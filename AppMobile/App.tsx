@@ -10,7 +10,7 @@ const App = () => {
   return (
     <View style={styles.sectionContainer}>
       <Text>
-        Hello Word!
+        
       </Text>
     </View>
   );
