@@ -41,7 +41,7 @@ const App = () => {
         buttonPositive: 'OK',
       },
     ).then(answere => {
-      console.log('scanning');
+      console.log('Escaneando bluetooth');
       // display the Activityindicator
 
       BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
@@ -66,7 +66,7 @@ const App = () => {
 
   async function connectDevice(device: Device) 
   {
-    console.log('connecting to Device:', device.name);
+    console.log('Conectando o dispositivo:', device.name);
 
     device
       .connect()
@@ -78,7 +78,7 @@ const App = () => {
       .then(device => {
         //  Set what to do when DC is detected
         BLTManager.onDeviceDisconnected(device.id, (error, device) => {
-          console.log('Device DC');
+          console.log('Dispositivo disconectado');
           setIsConnected(false);
         });
 
@@ -129,7 +129,7 @@ const App = () => {
   return (
     <View style={styles.sectionContainer}>
       <Text>
-        {message}
+        {isConnected ? message : 'Esperando dados'}
       </Text>
       <TouchableOpacity style={{width: 120}}>
         {!isConnected ? (
