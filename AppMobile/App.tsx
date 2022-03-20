@@ -59,7 +59,7 @@ const App = () => {
       // stop scanning devices after 5 seconds
       setTimeout(() => {
         BLTManager.stopDeviceScan();
-        console.log('Parou');
+        console.log('Parou escaneamento');
       }, 5000);
     });
   }
@@ -78,7 +78,7 @@ const App = () => {
       .then(device => {
         //  Set what to do when DC is detected
         BLTManager.onDeviceDisconnected(device.id, (error, device) => {
-          console.log('Dispositivo disconectado');
+          console.log('Dispositivo desconectado');
           setIsConnected(false);
         });
 
@@ -106,7 +106,7 @@ const App = () => {
 
   // handle the device disconnection (poorly)
   async function disconnectDevice() {
-    console.log('Disconnecting start');
+    console.log('Iniciando desconexão');
 
     if (connectedDevice != null) {
       const isDeviceConnected = await connectedDevice.isConnected();
@@ -115,7 +115,7 @@ const App = () => {
         BLTManager.cancelTransaction('nightmodetransaction');
 
         BLTManager.cancelDeviceConnection(connectedDevice.id).then(() =>
-          console.log('DC completed'),
+          console.log('Desconexão completa'),
         );
       }
 
