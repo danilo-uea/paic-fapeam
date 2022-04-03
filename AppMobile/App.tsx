@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {BleManager, Device} from 'react-native-ble-plx';
 import base64 from 'react-native-base64';
+import BluetoothBle from './src/services/bluetooth/'
 
 import {
   StyleSheet,
@@ -14,7 +15,10 @@ import {
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
+
 const BLTManager = new BleManager();
+
+const ble = new BluetoothBle();
 
 const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
 
@@ -126,12 +130,45 @@ const App = () => {
     }
   }
 
+  async function conectando() {
+    await ble.scanDevices().then(response => {
+      
+      // console.log('Monitorando');
+      // const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+      // const MESSAGE_UUID = '6d68efe5-04b6-4a85-abc4-c2670b7bf7fd';
+      // if(response === undefined){
+      //   console.log('Indefinido')
+      // }
+      // else
+      // {
+      //   // console.log(response.name)
+      // }
+    //   ble.connectedDevice?.monitorCharacteristicForService(
+    //     SERVICE_UUID,
+    //     MESSAGE_UUID,
+    //     (error, characteristic) => {
+    //         if (characteristic?.value != null) {
+    //             //   setMessage(base64.decode(characteristic?.value));
+    //             console.log(base64.decode(characteristic?.value));
+    //         }
+    //     },
+    // 'messagetransaction',
+    // );
+
+    });
+  }
+
+  async function desconectando() {
+    ble.disconnectDevice();
+    // console.log(bls.contador())
+  }
+
   return (
     <View style={styles.sectionContainer}>
       <Text>
         {isConnected ? message : 'Esperando dados'}
       </Text>
-      <TouchableOpacity style={{width: 120}}>
+      <TouchableOpacity style={{width: 120, marginBottom: 10}}>
         {!isConnected ? (
             <Button
               title="Connect"
@@ -149,6 +186,22 @@ const App = () => {
               disabled={false}
             />
           )}
+      </TouchableOpacity>
+      <TouchableOpacity style={{width: 120, marginBottom: 10}}>
+        <Button
+          title="Testando Conectando"
+          onPress={() => {
+            conectando();
+          }}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity style={{width: 120, marginBottom: 10}}>
+        <Button
+          title="Testando Desconectando"
+          onPress={() => {
+            desconectando();
+          }}
+        />
       </TouchableOpacity>
     </View>
   );
