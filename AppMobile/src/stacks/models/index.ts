@@ -5,7 +5,7 @@ export type propsNavigationStack = {
         name: string
         id: number
     }
-    Pagination: {
+    Pagination?: {
         name: string
         id: number
     }

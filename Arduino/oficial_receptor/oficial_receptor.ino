@@ -7,6 +7,12 @@
 #include <LoRa.h>
 #include <SPI.h>
 
+/* Bibliotecas Bluetooth BLE */
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+#include <BLE2902.h>
+
 /* Pinagem para o Display Oled */
 #define OLED_SDA 4
 #define OLED_SCL 15
@@ -23,12 +29,32 @@
 #define HIGH_GAIN_LORA     20 /* dBm */
 #define BAND               915E6 /* 915MHz de frequencia */
 
+/* Bluetooth BLE UUID */
+#define SERVICE_UUID           "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID_TX "6d68efe5-04b6-4a85-abc4-c2670b7bf7fd"
+
 /* Pinagem para o fator de espalhamento */
 int fatorE = 7;     /* Valor do fator de espalhamento */
 int fatorE_ant = 7; /* Valor do fator de espalhamento anterior */
 int pinoPOT = 13;   /* Potenciômetro do fator de espalhamento */
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST); /* Definicões do Display OLED */
+/* Definicões do Display OLED */
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
+
+/* Bluetooth BLE */
+BLECharacteristic *pCharacteristic; /* Característica */
+bool deviceConnected = false; /* Status de conexão */
+
+/* Bluetooth BLE Classe*/
+class MyServerCallbacks: public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer) {
+    deviceConnected = true;
+  };
+
+  void onDisconnect(BLEServer* pServer) {
+    deviceConnected = false;
+  }
+};
 
 /* Estrutura do pacote de dados */
 typedef struct __attribute__((__packed__))  
@@ -37,15 +63,44 @@ typedef struct __attribute__((__packed__))
   byte hora;
   byte minuto;
   byte segundo;
+  byte dia;
+  byte mes;
+  int ano;
   float f_latitude;
   float f_longitude;
-  float f_aaltitude;
 } TDadosLora;
 
+void StartBluetoothBle();
 void aguardando_dados_display();
 void escreve_medicoes_display(TDadosLora dados_lora, int lora_rssi);
 void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote);
 bool init_comunicacao_lora(void);
+
+void StartBluetoothBle(){
+  /* Criar o BLE Device */
+  BLEDevice::init("ESP32");
+
+  /* Criar o BLE Server */
+  BLEServer *pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
+
+  /* Criar o BLE Service */
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+
+  /* Criar o BLE Characteristic */
+  pCharacteristic =pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
+
+  /* BLE2902 precisa notificar */
+  pCharacteristic->addDescriptor(new BLE2902());
+
+  /* Iniciar o serviço */
+  pService->start();
+
+  /* Começar a anunciar */
+  pServer->getAdvertising()->start();
+
+  Serial.println("BLE iniciado");
+}
 
 void aguardando_dados_display() {
   /* Imprimir mensagem dizendo para esperar a chegada dos dados */
@@ -65,17 +120,14 @@ void escreve_medicoes_display(TDadosLora dados_lora, int lora_rssi)
   char str_rssi[11];
   char str_flat[11];
   char str_flon[11];
-  char str_falt[11];
 
   memset(str_rssi,0,sizeof(str_rssi));
   memset(str_flat,0,sizeof(str_flat));
   memset(str_flon,0,sizeof(str_flon));
-  memset(str_falt,0,sizeof(str_falt));
   
   sprintf(str_rssi, "%d", lora_rssi);
   sprintf(str_flat, "%.6f", dados_lora.f_latitude);
   sprintf(str_flon, "%.6f", dados_lora.f_longitude);
-  sprintf(str_falt, "%.2f", dados_lora.f_aaltitude);
       
   display.clearDisplay();
 
@@ -99,9 +151,13 @@ void escreve_medicoes_display(TDadosLora dados_lora, int lora_rssi)
   display.print("Lon: ");
   display.println(str_flon);
 
-  display.setCursor(0, 50);
-  display.print("Alt: ");
-  display.println(str_falt);
+  if (deviceConnected){
+    display.setCursor(0, 50);
+    display.println("Status Ble: enviando");
+  } else {
+    display.setCursor(0, 50);
+    display.println("Status Ble: sem conexão");
+  }
   
   display.display();
 }
@@ -111,8 +167,33 @@ void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote)
   char mensagem[80];
   
   memset(mensagem,0,sizeof(mensagem));
-  sprintf(mensagem,"%d;%02d:%02d:%02d;%d;%d;%d;%.6f;%.6f;%.2f", dados_lora.contador, dados_lora.hora, dados_lora.minuto, dados_lora.segundo, fatorE, lora_rssi, tam_pacote, dados_lora.f_latitude, dados_lora.f_longitude, dados_lora.f_aaltitude);
+  sprintf(mensagem,"%d;%d;%d;%d;%02d:%02d:%02d;%d;%d;%d;%.6f;%.6f", 
+    dados_lora.contador, 
+    dados_lora.dia, 
+    dados_lora.mes, 
+    dados_lora.ano, 
+    dados_lora.hora, 
+    dados_lora.minuto, 
+    dados_lora.segundo, 
+    fatorE, 
+    lora_rssi, 
+    tam_pacote, 
+    dados_lora.f_latitude, 
+    dados_lora.f_longitude);
+    
   Serial.println(mensagem);
+
+  if (deviceConnected){
+    Serial.println("Status Ble:enviando");
+    
+    /* Definindo o valor para a característica */
+    pCharacteristic->setValue(mensagem);
+
+    /* Notificar o cliente conectado */
+    pCharacteristic->notify();
+  } else {
+    Serial.println("Status Ble: sem conexão");
+  }
 }
 
 bool init_comunicacao_lora(void)
@@ -142,14 +223,6 @@ bool init_comunicacao_lora(void)
       LoRa.setTxPower(HIGH_GAIN_LORA); /* Configura o ganho do receptor LoRa para 20dBm, o maior ganho possível (visando maior alcance possível) */ 
       LoRa.setSignalBandwidth(125E3);  /* Largura de banda fixa de 125 kHz *//* Suporta valores: 7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, 250E3 e 500E3 */
       LoRa.setCodingRate4(5);          /* Taxa de código - Suporta valores entre 5 e 8 */
-
-      //Serial.println("[LoRa Receptor] Comunicacao com o radio LoRa ok");
-      
-      //display.setCursor(0, 0);
-      //display.println("Radio LoRa");
-      //display.setCursor(0, 10);
-      //display.println("Status: Ok");
-      //display.display();
     }
 
     return status_init;
@@ -159,6 +232,9 @@ void setup()
 {
   /* Monitor Serial */
   Serial.begin(115200);
+
+  /* Iniciando Bluetooth BLE */
+  StartBluetoothBle();
 
   /* Preparando a inicialização do display OLED */
   pinMode(OLED_RST, OUTPUT);
@@ -178,13 +254,6 @@ void setup()
   }
 
   while(init_comunicacao_lora() == false); /* Tenta, até obter sucesso na comunicacao com o chip LoRa */
-  //delay(2000);
-    
-  //init_wifi(); /* Inicialização do WI-FI */
-  //delay(2000);
-  
-  //init_MQTT(); /* Inicialização do MQTT */
-  //delay(2000);
 
   /* Imprimir mensagem dizendo para esperar a chegada dos dados */
   Serial.println("Aguardando dados...");
@@ -230,9 +299,5 @@ void loop()
 
     envia_medicoes_serial(dados_lora, lora_rssi, tam_pacote);
     escreve_medicoes_display(dados_lora, lora_rssi);
-    //envia_informacoes_por_mqtt(dados_lora, lora_rssi, tam_pacote);
   }
-  
-  //MQTT.loop();                     /* Faz o keep-alive do MQTT */
-  //verifica_conexoes_wifi_e_MQTT(); /* Verifica se as conexões MQTT e wi-fi estão ativas. Se alguma delas não estiver ativa, a reconexão é feita */
 }

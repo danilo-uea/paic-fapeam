@@ -4,7 +4,9 @@ import DateTimeInput from '../../components/DateTimeInput';
 import { CustomButton, CustomButtonText, ViewHorizontal } from './styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const Pagination = () => {
+const Pagination = ({ route }: any) => {
+    // console.log(route.params?.name + ': ' + route.params?.id)
+
     const [dateStart, setDateStart] = useState(new Date());
     const [dataInicialBr, setDataInicialBr] = useState<string>('');
     const [horaInicialBr, setHoraInicialBr] = useState<string>('');

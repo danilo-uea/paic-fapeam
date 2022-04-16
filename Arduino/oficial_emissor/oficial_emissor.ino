@@ -49,9 +49,11 @@ typedef struct __attribute__((__packed__))
   byte hora;
   byte minuto;
   byte segundo;
+  byte dia;
+  byte mes;
+  int ano;
   float f_latitude;
   float f_longitude;
-  float f_aaltitude;
 } TDadosLora;
 
 void aguardando_dados_display();
@@ -87,10 +89,8 @@ void escreve_medicoes_display(TDadosLora dados_lora)
 
     char str_flat[11] = {0};
     char str_flon[11] = {0};
-    char str_falt[11] = {0};
     sprintf(str_flat, "%.6f", dados_lora.f_latitude);
     sprintf(str_flon, "%.6f", dados_lora.f_longitude);
-    sprintf(str_falt, "%.2f", dados_lora.f_aaltitude);
     
     display.setCursor(0, 20);
     display.print("Lat: ");
@@ -99,10 +99,6 @@ void escreve_medicoes_display(TDadosLora dados_lora)
     display.setCursor(0, 30);
     display.print("Lon: ");
     display.println(str_flon);
-
-    display.setCursor(0, 40);
-    display.print("Alt: ");
-    display.println(str_falt);
     
     display.display();
 }
@@ -127,10 +123,6 @@ void envia_medicoes_serial(TDadosLora dados_lora)
 
   memset(mensagem,0,sizeof(mensagem));
   sprintf(mensagem,"Lon: %.6f", dados_lora.f_longitude);
-  Serial.println(mensagem);
-
-  memset(mensagem,0,sizeof(mensagem));
-  sprintf(mensagem,"Altitude: %.2f", dados_lora.f_aaltitude);
   Serial.println(mensagem);
   
   Serial.println(" ");
@@ -262,14 +254,11 @@ void loop()
 
   /* Verifica se a leitura do módulo de GPS foi bem sucedida */
   if (newData)
-  { 
+  {
     gps.f_get_position(&dados_lora.f_latitude, &dados_lora.f_longitude, &idade);
-    dados_lora.f_aaltitude = gps.f_altitude();
 
-    //Dia e Hora
-     int ano;
-     byte mes, dia, centesimo;
-     gps.crack_datetime(&ano, &mes, &dia, &dados_lora.hora, &dados_lora.minuto, &dados_lora.segundo, &centesimo, &idade);
+    byte centesimo;
+    gps.crack_datetime(&dados_lora.ano, &dados_lora.mes, &dados_lora.dia, &dados_lora.hora, &dados_lora.minuto, &dados_lora.segundo, &centesimo, &idade);
 
     envia_medicoes_serial(dados_lora);
     escreve_medicoes_display(dados_lora);

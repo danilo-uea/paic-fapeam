@@ -36,3 +36,4 @@ export const CustomButtonText = styled.Text`
     font-size: 15px;
     color: #FFF;
 `;
+
