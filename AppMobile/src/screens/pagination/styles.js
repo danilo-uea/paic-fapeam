@@ -20,6 +20,7 @@ const Input = styled.TextInput`
 
 export const ViewHorizontal = styled.View`
     flex-direction: row;
+    margin-top: 5px;
 `;
 
 export const CustomButton = styled.TouchableOpacity`

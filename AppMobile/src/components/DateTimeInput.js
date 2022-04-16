@@ -13,7 +13,7 @@ const InputArea = styled.TouchableOpacity`
 
 const Input = styled.Text`
     font-size: 15px;
-    color: #268196;
+    color: #354C9C;
 `;
 
 const DateTimeInput = ({ texto, tamanho, onPress }) => {

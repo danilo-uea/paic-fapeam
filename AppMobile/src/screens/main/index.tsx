@@ -1,15 +1,13 @@
-import { ThemeProvider } from '@react-navigation/native';
 import React, {useState} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { CustomButton, CustomButtonText } from './styles';
 
-const Main = () => {
+const Main = ({ route }: any) => {
   
+  console.log('Route: ' + route.params?.id)
+
   return (
-    <View>
-      <CustomButton onPress={() => console.log('Botão pressionado')}>
-          <CustomButtonText>LOGIN</CustomButtonText>
-      </CustomButton>
+    <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+      <Text>Início</Text>
     </View>
   );
 };
