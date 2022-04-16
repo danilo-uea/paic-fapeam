@@ -1,22 +1,17 @@
+import { ThemeProvider } from '@react-navigation/native';
 import React, {useState} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { CustomButton, CustomButtonText } from './styles';
 
 const Main = () => {
+  
   return (
-    <View style={styles.sectionContainer}>
-      <Text>
-        Texto
-      </Text>
+    <View>
+      <CustomButton onPress={() => console.log('Botão pressionado')}>
+          <CustomButtonText>LOGIN</CustomButtonText>
+      </CustomButton>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-});
 
 export default Main;

@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Button, LogBox } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import { Text, View, TouchableOpacity, Button, LogBox, StyleSheet, Platform } from 'react-native';
 
 import base64 from 'react-native-base64';
 import BluetoothBle from '../../src/services/bluetooth';
@@ -13,6 +13,8 @@ LogBox.ignoreAllLogs();                        //Ignore all log notifications
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Main from '../screens/main';
+import { ViewHorizontal, CustomButton, CustomButtonText } from './styles';
+import DateTimeInput from '../components/DateTimeInput';
 
 const Stack = createNativeStackNavigator();
 
@@ -87,30 +89,100 @@ const MainStack = () => {
         }
     }
 
+    const [dateStart, setDateStart] = useState(new Date());
+    const [dataInicialBr, setDataInicialBr] = useState<string>('');
+    const [horaInicialBr, setHoraInicialBr] = useState<string>('');
+    
+    const [dateEnd, setDateEnd] = useState(new Date());
+    const [dataFinalBr, setDataFinalBr] = useState<string>('');
+    const [horaFinalBr, setHoraFinalBr] = useState<string>('');
+    
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+    const [text, setText] = useState('Empty');
+
+    useEffect(() => {
+        onChange(dateStart);
+    }, [dateStart]);
+
+    const onChange = (selectedDate: any) => {
+        const currentDate = selectedDate || dateStart;
+        setShow(Platform.OS === 'ios')
+        setDateStart(currentDate);
+
+        let tempDate = new Date(currentDate);
+        let fDate = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
+        let fTime = tempDate.getHours() + ':' + tempDate.getMinutes();
+        
+        setDataInicialBr(fDate);
+        setHoraInicialBr(fTime);
+    }
+
+    const showMode = (currentMode: string) => {
+        setShow(true);
+        setMode(currentMode);
+    }
+
     return (
         <>
-            <View>
-                <Text>{isConnected ? message : 'Esperando dados'}</Text>
-                <TouchableOpacity style={{width: 120, marginBottom: 10}}>
+            <View style={{ marginTop: 5 }} />
+            <ViewHorizontal>
+                <View style={{ marginRight: 10 }}>
+                    <Text>Inicial</Text>
+                    <ViewHorizontal>
+                        <DateTimeInput
+                            texto={dataInicialBr}
+                            tamanho="110px"
+                            onPress={() => { console.log('Pressionado') }}
+                        />
+                        <DateTimeInput
+                            texto={horaInicialBr}
+                            tamanho="60px"
+                            onPress={() => { console.log('Pressionado') }}
+                        />
+                    </ViewHorizontal>
+                </View>
+                <View>
+                    <Text>Final</Text>
+                    <ViewHorizontal>
+                        <DateTimeInput
+                            texto="25/03/1988"
+                            tamanho="110px"
+                            onPress={() => { console.log('Pressionado') }}
+                        />
+                        <DateTimeInput
+                            texto="19:51"
+                            tamanho="60px"
+                            onPress={() => { console.log('Pressionado') }}
+                        />
+                    </ViewHorizontal>
+                </View>
+            </ViewHorizontal>
+            <ViewHorizontal>
+                <CustomButton onPress={() => console.log('Desconectando')}>
+                    <CustomButtonText>
+                        Exportar
+                    </CustomButtonText>
+                </CustomButton>
                     {!isConnected ? (
-                        <Button
-                            title="Connect"
-                            onPress={() => {
-                                scanDevices();
-                            }}
-                            disabled={false}
-                        />
+                        <CustomButton onPress={() => console.log('Conectando')}>
+                            <CustomButtonText>
+                                Conectar
+                            </CustomButtonText>
+                        </CustomButton>
                     ) : (
-                        <Button
-                            title="Disonnect"
-                            onPress={() => {
-                                disconnectDevice();
-                            }}
-                            disabled={false}
-                        />
+                        <CustomButton onPress={() => console.log('Desconectando')}>
+                            <CustomButtonText>
+                                Desconectar
+                            </CustomButtonText>
+                        </CustomButton>
                     )}
-                </TouchableOpacity>
-            </View>
+                <CustomButton onPress={() => console.log('Desconectando')}>
+                    <CustomButtonText>
+                        Excluir
+                    </CustomButtonText>
+                </CustomButton>
+            </ViewHorizontal>
             <Stack.Navigator initialRouteName="main"
                 screenOptions={{
                     headerShown: false
