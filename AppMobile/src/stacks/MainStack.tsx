@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { Text, View, TouchableOpacity, Button, LogBox, StyleSheet, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import base64 from 'react-native-base64';
 import BluetoothBle from '../../src/services/bluetooth';
@@ -97,30 +98,55 @@ const MainStack = () => {
     const [dataFinalBr, setDataFinalBr] = useState<string>('');
     const [horaFinalBr, setHoraFinalBr] = useState<string>('');
     
-    const [mode, setMode] = useState('date');
+    const [mode, setMode] = useState<any>('date');
+    const [modeFinal, setModeFinal] = useState<any>('date');
     const [show, setShow] = useState(false);
-    const [text, setText] = useState('Empty');
+    const [showFinal, setShowFinal] = useState(false);
 
     useEffect(() => {
-        onChange(dateStart);
-    }, [dateStart]);
+        onChange('', dateStart);
+        onChangeFinal('', dateEnd);
+    }, [dateStart, dateEnd]);
 
-    const onChange = (selectedDate: any) => {
+    const onChange = (event: any, selectedDate: any) => {
         const currentDate = selectedDate || dateStart;
         setShow(Platform.OS === 'ios')
         setDateStart(currentDate);
 
         let tempDate = new Date(currentDate);
-        let fDate = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
-        let fTime = tempDate.getHours() + ':' + tempDate.getMinutes();
+        let fDate = zeroEsquerda(tempDate.getDate()) + '/' + zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
+        let fTime = zeroEsquerda(tempDate.getHours()) + ':' + zeroEsquerda(tempDate.getMinutes());
         
         setDataInicialBr(fDate);
         setHoraInicialBr(fTime);
     }
 
+    const onChangeFinal = (event: any, selectedDate: any) => {
+        const currentDate = selectedDate || dateEnd;
+        setShowFinal(Platform.OS === 'ios')
+        setDateEnd(currentDate);
+
+        let tempDate = new Date(currentDate);
+        let fDate = zeroEsquerda(tempDate.getDate()) + '/' + zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
+        let fTime = zeroEsquerda(tempDate.getHours()) + ':' + zeroEsquerda(tempDate.getMinutes());
+        
+        setDataFinalBr(fDate);
+        setHoraFinalBr(fTime);
+    }
+
     const showMode = (currentMode: string) => {
         setShow(true);
         setMode(currentMode);
+    }
+
+    const showModeFinal = (currentMode: string) => {
+        setShowFinal(true);
+        setModeFinal(currentMode);
+    }
+
+    const zeroEsquerda = (valor: number) => {
+        let retorno: string = valor >= 0 && valor < 10 ? '0' + valor: valor.toString();
+        return retorno;
     }
 
     return (
@@ -133,12 +159,12 @@ const MainStack = () => {
                         <DateTimeInput
                             texto={dataInicialBr}
                             tamanho="110px"
-                            onPress={() => { console.log('Pressionado') }}
+                            onPress={() => { showMode('date') }}
                         />
                         <DateTimeInput
                             texto={horaInicialBr}
                             tamanho="60px"
-                            onPress={() => { console.log('Pressionado') }}
+                            onPress={() => { showMode('time') }}
                         />
                     </ViewHorizontal>
                 </View>
@@ -146,14 +172,14 @@ const MainStack = () => {
                     <Text>Final</Text>
                     <ViewHorizontal>
                         <DateTimeInput
-                            texto="25/03/1988"
+                            texto={dataFinalBr}
                             tamanho="110px"
-                            onPress={() => { console.log('Pressionado') }}
+                            onPress={() => { showModeFinal('date') }}
                         />
                         <DateTimeInput
-                            texto="19:51"
+                            texto={horaFinalBr}
                             tamanho="60px"
-                            onPress={() => { console.log('Pressionado') }}
+                            onPress={() => { showModeFinal('time') }}
                         />
                     </ViewHorizontal>
                 </View>
@@ -183,6 +209,26 @@ const MainStack = () => {
                     </CustomButtonText>
                 </CustomButton>
             </ViewHorizontal>
+            {show && (
+                <DateTimePicker
+                    testID='dateTimePicker'
+                    value={dateStart}
+                    mode={mode}
+                    is24Hour={true}
+                    display='default'
+                    onChange={onChange}
+                 />
+            )}
+            {showFinal && (
+                <DateTimePicker
+                    testID='dateTimePicker'
+                    value={dateEnd}
+                    mode={modeFinal}
+                    is24Hour={true}
+                    display='default'
+                    onChange={onChangeFinal}
+                 />
+            )}
             <Stack.Navigator initialRouteName="main"
                 screenOptions={{
                     headerShown: false
