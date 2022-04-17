@@ -73,6 +73,19 @@ const MainStack = () => {
                     (error, characteristic) => {
                         if (characteristic?.value != null) {
                             setMessage(base64.decode(characteristic?.value));
+                            // 10082;17;4;2022;16:00:28;7;-75;21;-3.030872;-59.970642
+                            // dados_lora.contador, 
+                            // dados_lora.dia, 
+                            // dados_lora.mes, 
+                            // dados_lora.ano, 
+                            // dados_lora.hora, 
+                            // dados_lora.minuto, 
+                            // dados_lora.segundo, 
+                            // fatorE, 
+                            // lora_rssi, 
+                            // tam_pacote, 
+                            // dados_lora.f_latitude, 
+                            // dados_lora.f_longitude
                             console.log(base64.decode(characteristic?.value));
                         }
                     },
