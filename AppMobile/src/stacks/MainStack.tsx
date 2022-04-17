@@ -48,8 +48,13 @@ const MainStack = () => {
     }
 
     async function connectDevice(device: Device) {
+        const options = {
+            autoConnect: false,
+            requestMTU: 128
+          };
+
         device
-            .connect()
+            .connect(options)
             .then(device => {
                 return device.discoverAllServicesAndCharacteristics();
             })
@@ -80,16 +85,12 @@ const MainStack = () => {
         if (connectedDevice != null) {
             const isDeviceConnected = await connectedDevice.isConnected();
             if (isDeviceConnected) {
-                BLTManager.cancelTransaction('messagetransaction');
-                BLTManager.cancelTransaction('nightmodetransaction');
+                await BLTManager.cancelTransaction('messagetransaction');
+                await BLTManager.cancelTransaction('nightmodetransaction');
 
-                BLTManager.cancelDeviceConnection(connectedDevice.id);
-            }
-
-            const connectionStatus = await connectedDevice.isConnected();
-
-            if (!connectionStatus) {
-                setIsConnected(false);
+                BLTManager.cancelDeviceConnection(connectedDevice.id).then(response => {
+                    setIsConnected(false);
+                });
             }
         }
     }

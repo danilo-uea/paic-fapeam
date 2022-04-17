@@ -80,6 +80,9 @@ void StartBluetoothBle(){
   /* Criar o BLE Device */
   BLEDevice::init("ESP32");
 
+  uint16_t mtu = 128;
+  BLEDevice::setMTU(mtu);
+
   /* Criar o BLE Server */
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
@@ -180,19 +183,20 @@ void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote)
     tam_pacote, 
     dados_lora.f_latitude, 
     dados_lora.f_longitude);
-    
-  Serial.println(mensagem);
 
+  Serial.print(mensagem);
+  
   if (deviceConnected){
-    Serial.println("Status Ble:enviando");
+    Serial.println(" (enviando)");
     
     /* Definindo o valor para a característica */
     pCharacteristic->setValue(mensagem);
 
     /* Notificar o cliente conectado */
     pCharacteristic->notify();
+    
   } else {
-    Serial.println("Status Ble: sem conexão");
+    Serial.println(" (sem conexão)");
   }
 }
 
