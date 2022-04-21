@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, LogBox, StyleSheet, Text } from 'react-native';
 
 import base64 from 'react-native-base64';
@@ -22,11 +22,49 @@ import ButtonTopMenu from '../components/ButtonTopMenu';
 
 const Stack = createNativeStackNavigator<propsNavigationStack>();
 
+var cont: number = 1234;
+
 const MainStack = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [connectedDevice, setConnectedDevice] = useState<Device>();
     const [message, setMessage] = useState('Esperando dados');
     const navigation = useNavigation<propsStack>();
+    const [intervalId, setIntervalId] = useState<any>();
+
+    useEffect(() => {        
+        if (intervalId){
+            clearInterval(intervalId);
+        }
+        
+        var Id = setInterval(() => {
+            cont++;
+            setMessage(cont.toString() + ';17;4;2022;16:00:28;7;-75;21;-3.030872;-59.970642')
+        }, 4000);
+
+        setIntervalId(Id);
+    }, []);
+
+    useEffect(() => {
+        splitString(message, ';')
+    }, [message])
+
+    const splitString = (stringToSplit:string, separator:string) => {
+        var arrayOfStrings = stringToSplit.split(separator);
+
+        console.log(
+            arrayOfStrings[0] + ';' + 
+            arrayOfStrings[1] + ';' +
+            arrayOfStrings[2] + ';' + 
+            arrayOfStrings[3] + ';' + 
+            arrayOfStrings[4] + ';' + 
+            arrayOfStrings[5] + ';' + 
+            arrayOfStrings[6] + ';' + 
+            arrayOfStrings[7] + ';' + 
+            arrayOfStrings[8] + ';' + 
+            arrayOfStrings[9]
+        );
+    }
+
 
     async function scanDevices() {
         BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
@@ -86,7 +124,6 @@ const MainStack = () => {
                             // tam_pacote, 
                             // dados_lora.f_latitude, 
                             // dados_lora.f_longitude
-                            console.log(base64.decode(characteristic?.value));
                         }
                     },
                     'messagetransaction',
