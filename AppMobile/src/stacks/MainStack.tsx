@@ -39,7 +39,7 @@ const MainStack = () => {
         var Id = setInterval(() => {
             cont++;
             setMessage(cont.toString() + ';17;4;2022;16:00:28;7;-75;21;-3.030872;-59.970642')
-        }, 4000);
+        }, 2000);
 
         setIntervalId(Id);
     }, []);
@@ -51,18 +51,18 @@ const MainStack = () => {
     const splitString = (stringToSplit:string, separator:string) => {
         var arrayOfStrings = stringToSplit.split(separator);
 
-        console.log(
-            arrayOfStrings[0] + ';' + 
-            arrayOfStrings[1] + ';' +
-            arrayOfStrings[2] + ';' + 
-            arrayOfStrings[3] + ';' + 
-            arrayOfStrings[4] + ';' + 
-            arrayOfStrings[5] + ';' + 
-            arrayOfStrings[6] + ';' + 
-            arrayOfStrings[7] + ';' + 
-            arrayOfStrings[8] + ';' + 
-            arrayOfStrings[9]
-        );
+        // console.log(
+        //     arrayOfStrings[0] + ';' + 
+        //     arrayOfStrings[1] + ';' +
+        //     arrayOfStrings[2] + ';' + 
+        //     arrayOfStrings[3] + ';' + 
+        //     arrayOfStrings[4] + ';' + 
+        //     arrayOfStrings[5] + ';' + 
+        //     arrayOfStrings[6] + ';' + 
+        //     arrayOfStrings[7] + ';' + 
+        //     arrayOfStrings[8] + ';' + 
+        //     arrayOfStrings[9]
+        // );
     }
 
 
