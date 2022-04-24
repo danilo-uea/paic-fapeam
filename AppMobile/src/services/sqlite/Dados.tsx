@@ -28,10 +28,18 @@ const create = (Nome:string, Idade:number, DataInicial: string) => {
 const all = () => {
   return new Promise(async (resolve, reject) => {
     try {
+      let dataInicial = '2022-04-22 20:14:00';
+      let dataFinal = '2022-04-26 20:12:59';
+      let query = 
+        "SELECT ID, Name, Age, DataInicial " + 
+        "FROM Users " + 
+        "WHERE strftime('%Y-%m-%d %H:%M:%S', DataInicial) > strftime('%Y-%m-%d %H:%M:%S', ?) " + 
+        "AND strftime('%Y-%m-%d %H:%M:%S', DataInicial) < strftime('%Y-%m-%d %H:%M:%S', ?)";
+
       await db.transaction(async (tx) => {
         await tx.executeSql(
           // "SELECT ID, Name, Age, DataInicial FROM Users", [],
-          "SELECT ID, Name, Age, DataInicial FROM Users WHERE strftime('%Y-%m-%d', DataInicial) > strftime('%Y-%m-%d', '2022-04-23') AND strftime('%Y-%m-%d', DataInicial) < strftime('%Y-%m-%d', '2022-04-26')", [],
+          query, [dataInicial, dataFinal],
           (tx, results) => {
             let list = [];
             var len = results.rows.length;
