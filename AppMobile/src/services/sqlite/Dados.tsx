@@ -6,16 +6,16 @@ db.transaction((tx) => {
     tx.executeSql(
         "CREATE TABLE IF NOT EXISTS "
         + "Users "
-        + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Age INTEGER)"
+        + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Age INTEGER, DataInicial DATETIME)"
     )
 })
 
-const create = (Nome:string, Idade:number) => {
+const create = (Nome:string, Idade:number, DataInicial: string) => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
-          "INSERT INTO Users (Name, Age) VALUES (?,?)", [Nome, Idade]
+          "INSERT INTO Users (Name, Age, DataInicial) VALUES (?,?,?)", [Nome, Idade, DataInicial]
         )
       })
       resolve('Inserido com sucesso')
@@ -30,14 +30,15 @@ const all = () => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
-          "SELECT ID, Name, Age FROM Users", [],
+          // "SELECT ID, Name, Age, DataInicial FROM Users", [],
+          "SELECT ID, Name, Age, DataInicial FROM Users WHERE strftime('%Y-%m-%d', DataInicial) > strftime('%Y-%m-%d', '2022-04-23') AND strftime('%Y-%m-%d', DataInicial) < strftime('%Y-%m-%d', '2022-04-26')", [],
           (tx, results) => {
             let list = [];
             var len = results.rows.length;
             if (len > 0) {  
               for (let i = 0; i < len; i++) {
                 let item = results.rows.item(i);
-                list.push({ id: item.ID, name: item.Name, age: item.Age })
+                list.push({ id: item.ID, name: item.Name, age: item.Age, dataInicial: item.DataInicial })
               }
             }
             resolve(list)
@@ -55,14 +56,15 @@ const get = (Id:number) => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
-          "SELECT ID, Name, Age FROM Users WHERE ID = ?", [Id],
+          "SELECT ID, Name, Age, DataInicial FROM Users WHERE ID = ?", [Id],
           (tx, results) => {
             var len = results.rows.length;
             if (len > 0) {
               var userId = results.rows.item(0).ID;
               var userName = results.rows.item(0).Name;
               var userAge = results.rows.item(0).Age;
-              resolve({ id: userId, name: userName, age: userAge })
+              var userDataInicial = results.rows.item(0).DataInicial;
+              resolve({ id: userId, name: userName, age: userAge, dataInicial: userDataInicial })
             } else {
               resolve(null)
             }
@@ -107,10 +109,35 @@ const removeAll = () => {
   })
 }
 
+const datas = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.transaction(async (tx) => {
+        await tx.executeSql(
+          // "SELECT datetime(1650665609) data;", [],
+          // "SELECT strftime('%s', 'now', 'localtime') data;", [],
+          "SELECT strftime('%d/%m/%Y %H:%M:%S', 'now', 'localtime') data;", [],
+          (tx, results) => {
+            var len = results.rows.length;
+            if (len > 0) {
+              resolve(results.rows.item(0).data)
+            } else {
+              resolve(null)
+            }
+          }
+        )
+      })
+    } catch (error) {
+      reject(error);
+    }
+  })
+}
+
 export default {
   create,
   all,
   get,
   remove,
-  removeAll
+  removeAll,
+  datas
 }

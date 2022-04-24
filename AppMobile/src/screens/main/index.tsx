@@ -8,8 +8,8 @@ const Main = ({ route }: any) => {
   useEffect(() => {
   }, [])
 
-  const addData = async (Nome:string, Idade:number) => {
-    Dados.create(Nome, Idade)
+  const addData = async (Nome:string, Idade:number, DataInicial:string) => {
+    Dados.create(Nome, Idade, DataInicial)
       .then((response:any) => {
         Alert.alert('Messagem', response.toString())
         console.log(response)
@@ -22,8 +22,11 @@ const Main = ({ route }: any) => {
 
   const listAll = () => {
     Dados.all()
-      .then(response => {
-        console.log(response)
+      .then((response:any) => {
+        response.forEach((element:any) => {
+          console.log(element)
+        });
+        console.log('')
       })
       .catch(err => {
         Alert.alert('Erro', err)
@@ -66,14 +69,28 @@ const Main = ({ route }: any) => {
       })
   }
 
+  const datas = async () => {
+    Dados.datas()
+      .then((response:any) => {
+        Alert.alert('Messagem', response.toString())
+        console.log(response)
+      })
+      .catch(err => {
+        Alert.alert('Erro', err)
+        console.log(err)
+      })
+  }
+
   return (
     <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
       <Text>Início</Text>
+      {/* <Button title='Teste' onPress={() => addData('Miracelma', 60, '2022-04-23 20:13')} /> */}
+      {/* <Button title='Data' onPress={() => datas()} /> */}
       <Button title='Listar' onPress={() => listAll()} />
-      <Button title='Adicionar' onPress={() => addData('Miracelma', 60)} />
-      <Button title='Pegar Id' onPress={() => getById(7)} />
-      <Button title='Remover' onPress={() => removeId(7)} />
-      <Button title='Remover Todos' onPress={() => removeAll()} />
+      <Button title='Adicionar' onPress={() => addData('Miracelma', 60, '2022-04-26 20:13:25')} />
+      {/* <Button title='Pegar Id' onPress={() => getById(7)} /> */}
+      {/* <Button title='Remover' onPress={() => removeId(7)} /> */}
+      {/* <Button title='Remover Todos' onPress={() => removeAll()} /> */}
     </View>
   );
 };
