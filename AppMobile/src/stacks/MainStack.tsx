@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, LogBox, StyleSheet, Text } from 'react-native';
+import { View, LogBox, StyleSheet, Text, Alert } from 'react-native';
+import DadosEsp32 from '../services/sqlite/DadosEsp32';
 
 import base64 from 'react-native-base64';
 import BluetoothBle from '../../src/services/bluetooth';
@@ -27,44 +28,36 @@ var cont: number = 1234;
 const MainStack = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [connectedDevice, setConnectedDevice] = useState<Device>();
-    const [message, setMessage] = useState('Esperando dados');
+    const [message, setMessage] = useState<string>('');
+    const [messageArray, setMessageArray] = useState<string[]>([]);
     const navigation = useNavigation<propsStack>();
     const [intervalId, setIntervalId] = useState<any>();
-
-    useEffect(() => {        
-        if (intervalId){
-            clearInterval(intervalId);
-        }
-        
-        var Id = setInterval(() => {
-            cont++;
-            setMessage(cont.toString() + ';17;4;2022;16:00:28;7;-75;21;-3.030872;-59.970642')
-        }, 2000);
-
-        setIntervalId(Id);
-    }, []);
 
     useEffect(() => {
         splitString(message, ';')
     }, [message])
 
-    const splitString = (stringToSplit:string, separator:string) => {
-        var arrayOfStrings = stringToSplit.split(separator);
+    useEffect(() => {
+        if (messageArray.length === 7) {
+            DadosEsp32.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6])
+                .then((response: any) => {
+                    console.log(response)
+                })
+                .catch(err => {
+                    Alert.alert('Erro', err)
+                    console.log(err)
+                })
+        }
+    }, [messageArray])
 
-        // console.log(
-        //     arrayOfStrings[0] + ';' + 
-        //     arrayOfStrings[1] + ';' +
-        //     arrayOfStrings[2] + ';' + 
-        //     arrayOfStrings[3] + ';' + 
-        //     arrayOfStrings[4] + ';' + 
-        //     arrayOfStrings[5] + ';' + 
-        //     arrayOfStrings[6] + ';' + 
-        //     arrayOfStrings[7] + ';' + 
-        //     arrayOfStrings[8] + ';' + 
-        //     arrayOfStrings[9]
-        // );
+    const splitString = (stringToSplit: string, separator: string) => {
+        if (message !== '') {
+            let arrayOfStrings = stringToSplit.split(separator);
+            if (arrayOfStrings.length === 7) {
+                setMessageArray(arrayOfStrings);
+            }
+        }
     }
-
 
     async function scanDevices() {
         BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
@@ -89,7 +82,7 @@ const MainStack = () => {
         const options = {
             autoConnect: false,
             requestMTU: 128
-          };
+        };
 
         device
             .connect(options)
@@ -153,6 +146,38 @@ const MainStack = () => {
         navigation.navigate('Pagination', { name: 'Pagination', id: 2 });
     }
 
+    const conectarMock = () => {
+        if (intervalId) {
+            clearInterval(intervalId);
+        }
+
+        var Id = setInterval(() => {
+            cont++;
+            let utcDate = new Date();
+            let data =
+                `${utcDate.getFullYear()}-` +                           //Ano
+                `${DadosEsp32.zeroEsquerda(utcDate.getMonth() + 1)}-` + //Mês
+                `${DadosEsp32.zeroEsquerda(utcDate.getDate())} ` +      //Dia
+                `${utcDate.toLocaleTimeString()}`;                      //Hora:minuto:segundo
+            let message = cont.toString() + ';' + data + ';7;-75;21;-3.030872;-59.970642';
+            setMessage(message)
+        }, 1000);
+
+        setIntervalId(Id);
+        setIsConnected(true);
+    }
+
+    const desconectarMock = () => {
+        if (intervalId) {
+            clearInterval(intervalId);
+        }
+
+        setMessage('');
+        setMessageArray([]);
+        setIntervalId(undefined);
+        setIsConnected(false);
+    }
+
     return (
         <>
             <View style={{ marginTop: 10, marginBottom: 10 }}>
@@ -160,13 +185,27 @@ const MainStack = () => {
                     <ButtonTopMenu texto='Principal' tamanho='100px' onPress={pagePrincipal} />
                     <ButtonTopMenu texto='Paginação' tamanho='110px' onPress={pagePaginacao} />
                     {!isConnected ? (
-                        <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => scanDevices()} />
+                        // <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => scanDevices()} />
+                        <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => conectarMock()} />
                     ) : (
-                        <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => disconnectDevice()} />
+                        // <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => disconnectDevice()} />
+                        <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => desconectarMock()} />
                     )}
                 </ViewHorizontal>
             </View>
-            <Text style={{ fontSize: 15 }}>{message}</Text>
+            {isConnected && messageArray.length === 7 ?
+                (
+                    <>
+                        <Text style={{ fontSize: 15 }}>Contador: {messageArray[0]}</Text>
+                        <Text style={{ fontSize: 15 }}>Data: {messageArray[1]}</Text>
+                        <Text style={{ fontSize: 15 }}>Fator de Espalhamento: {messageArray[2]}</Text>
+                        <Text style={{ fontSize: 15 }}>RSSI: {messageArray[3]}</Text>
+                        <Text style={{ fontSize: 15 }}>Tamanho Pacote: {messageArray[4]} bytes</Text>
+                        <Text style={{ fontSize: 15 }}>Latitude: {messageArray[5]}</Text>
+                        <Text style={{ fontSize: 15 }}>Longitude: {messageArray[6]}</Text>
+                    </>
+                ) : <></>
+            }
             <Stack.Navigator initialRouteName="Main"
                 screenOptions={{
                     headerShown: false

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Alert, Platform, Text, View } from 'react-native';
 import DateTimeInput from '../../components/DateTimeInput';
 import { CustomButton, CustomButtonText, ViewHorizontal } from './styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import DadosEsp32 from '../../services/sqlite/DadosEsp32';
+import ButtonTopMenu from '../../components/ButtonTopMenu';
 
 const Pagination = ({ route }: any) => {
     // console.log(route.params?.name + ': ' + route.params?.id)
@@ -31,8 +33,8 @@ const Pagination = ({ route }: any) => {
         setDateStart(currentDate);
 
         let tempDate = new Date(currentDate);
-        let fDate = zeroEsquerda(tempDate.getDate()) + '/' + zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
-        let fTime = zeroEsquerda(tempDate.getHours()) + ':' + zeroEsquerda(tempDate.getMinutes());
+        let fDate = DadosEsp32.zeroEsquerda(tempDate.getDate()) + '/' + DadosEsp32.zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
+        let fTime = DadosEsp32.zeroEsquerda(tempDate.getHours()) + ':' + DadosEsp32.zeroEsquerda(tempDate.getMinutes());
 
         setDataInicialBr(fDate);
         setHoraInicialBr(fTime);
@@ -44,8 +46,8 @@ const Pagination = ({ route }: any) => {
         setDateEnd(currentDate);
 
         let tempDate = new Date(currentDate);
-        let fDate = zeroEsquerda(tempDate.getDate()) + '/' + zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
-        let fTime = zeroEsquerda(tempDate.getHours()) + ':' + zeroEsquerda(tempDate.getMinutes());
+        let fDate = DadosEsp32.zeroEsquerda(tempDate.getDate()) + '/' + DadosEsp32.zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
+        let fTime = DadosEsp32.zeroEsquerda(tempDate.getHours()) + ':' + DadosEsp32.zeroEsquerda(tempDate.getMinutes());
 
         setDataFinalBr(fDate);
         setHoraFinalBr(fTime);
@@ -61,9 +63,50 @@ const Pagination = ({ route }: any) => {
         setModeFinal(currentMode);
     }
 
-    const zeroEsquerda = (valor: number) => {
-        let retorno: string = valor >= 0 && valor < 10 ? '0' + valor : valor.toString();
-        return retorno;
+    const listAll = () => {
+        DadosEsp32.all()
+            .then((response: any) => {
+                response?.forEach((element: any) => {
+                    console.log(element)
+                });
+                console.log('Qtd: ' + response?.length)
+            })
+            .catch(err => {
+                Alert.alert('Erro', err)
+                console.log(err)
+            })
+    }
+
+    const listDataHora = (DataInicial:Date, DataFinal:Date) => {
+        let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
+        let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
+
+        DadosEsp32.allDateTime(dataInicial, dataFinal)
+            .then((response: any) => {
+                response?.forEach((element: any) => {
+                    console.log(element)
+                });
+                console.log('Qtd: ' + response?.length)
+            })
+            .catch(err => {
+                Alert.alert('Erro', err)
+                console.log(err)
+            })
+    }
+
+    const removerDataHora = (DataInicial:Date, DataFinal:Date) => {
+        let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
+        let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
+
+        DadosEsp32.removeDateTime(dataInicial, dataFinal)
+            .then((response: any) => {
+                Alert.alert('Messagem', response.toString())
+                console.log(response)
+            })
+            .catch(err => {
+                Alert.alert('Erro', err)
+                console.log(err)
+            })
     }
 
     return (
@@ -101,16 +144,9 @@ const Pagination = ({ route }: any) => {
                 </View>
             </ViewHorizontal>
             <ViewHorizontal>
-                <CustomButton onPress={() => console.log('Exportar')}>
-                    <CustomButtonText>
-                        Exportar
-                    </CustomButtonText>
-                </CustomButton>
-                <CustomButton onPress={() => console.log('Excluir')}>
-                    <CustomButtonText>
-                        Excluir
-                    </CustomButtonText>
-                </CustomButton>
+                <ButtonTopMenu texto='Listar' tamanho='100px' onPress={() => listDataHora(dateStart, dateEnd)} />
+                <ButtonTopMenu texto='Exportar' tamanho='100px' onPress={null} />
+                <ButtonTopMenu texto='Excluir' tamanho='100px' onPress={() => removerDataHora(dateStart, dateEnd)} />
             </ViewHorizontal>
             {showInicial && (
                 <DateTimePicker

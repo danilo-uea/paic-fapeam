@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Alert, Button, Text, View } from 'react-native';
-import Dados from '../../services/sqlite/Dados';
+import DadosEsp32 from '../../services/sqlite/DadosEsp32';
 
 const Main = ({ route }: any) => {
   // console.log(route.params?.name + ': ' + route.params?.id)
@@ -8,8 +8,8 @@ const Main = ({ route }: any) => {
   useEffect(() => {
   }, [])
 
-  const addData = async (Nome:string, Idade:number, DataInicial:string) => {
-    Dados.create(Nome, Idade, DataInicial)
+  const addData = async (Contador:string, DataHora:string, Fe:string, Rssi:string, Tamanho:string, Latitude:string, Longitude:string) => {
+    DadosEsp32.create(Contador, DataHora, Fe, Rssi, Tamanho, Latitude, Longitude)
       .then((response:any) => {
         Alert.alert('Messagem', response.toString())
         console.log(response)
@@ -21,12 +21,12 @@ const Main = ({ route }: any) => {
   }
 
   const listAll = () => {
-    Dados.all()
+    DadosEsp32.all()
       .then((response:any) => {
-        response.forEach((element:any) => {
+        response?.forEach((element:any) => {
           console.log(element)
         });
-        console.log('')
+        console.log('Qtd: ' + response?.length)
       })
       .catch(err => {
         Alert.alert('Erro', err)
@@ -35,7 +35,7 @@ const Main = ({ route }: any) => {
   }
 
   const getById = (Id:number) => {
-    Dados.get(Id)
+    DadosEsp32.get(Id)
       .then(response => {
         console.log(response)
       })
@@ -46,7 +46,7 @@ const Main = ({ route }: any) => {
   }
 
   const removeId = async (Id:number) => {
-    Dados.remove(Id)
+    DadosEsp32.removeId(Id)
       .then((response:any) => {
         Alert.alert('Messagem', response.toString())
         console.log(response)
@@ -58,19 +58,7 @@ const Main = ({ route }: any) => {
   }
 
   const removeAll = async () => {
-    Dados.removeAll()
-      .then((response:any) => {
-        Alert.alert('Messagem', response.toString())
-        console.log(response)
-      })
-      .catch(err => {
-        Alert.alert('Erro', err)
-        console.log(err)
-      })
-  }
-
-  const datas = async () => {
-    Dados.datas()
+    DadosEsp32.removeAll()
       .then((response:any) => {
         Alert.alert('Messagem', response.toString())
         console.log(response)
@@ -87,10 +75,18 @@ const Main = ({ route }: any) => {
       {/* <Button title='Teste' onPress={() => addData('Miracelma', 60, '2022-04-23 20:13')} /> */}
       {/* <Button title='Data' onPress={() => datas()} /> */}
       <Button title='Listar' onPress={() => listAll()} />
-      <Button title='Adicionar' onPress={() => addData('Miracelma', 60, '2022-04-26 20:13:25')} />
-      {/* <Button title='Pegar Id' onPress={() => getById(7)} /> */}
-      {/* <Button title='Remover' onPress={() => removeId(7)} /> */}
-      {/* <Button title='Remover Todos' onPress={() => removeAll()} /> */}
+      {/* <Button title='Adicionar' onPress={() => addData(
+        '1236',
+        '2022-04-26 20:13:25', 
+        '7',
+        '-75',
+        '21',
+        '-3.030872',
+        '-59.970642',
+      )} /> */}
+      {/* <Button title='Pegar Id' onPress={() => getById(3)} /> */}
+      {/* <Button title='Remover' onPress={() => removeId(3)} /> */}
+      <Button title='Remover Todos' onPress={() => removeAll()} />
     </View>
   );
 };
