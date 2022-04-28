@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, LogBox, StyleSheet, Text, Alert } from 'react-native';
+import { View, LogBox, Text, Alert } from 'react-native';
 import DadosEsp32 from '../services/sqlite/DadosEsp32';
 
 import base64 from 'react-native-base64';

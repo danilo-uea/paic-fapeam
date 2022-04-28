@@ -57,7 +57,7 @@ const Main = ({ route }: any) => {
       })
   }
 
-  const removeAll = async () => {
+  const removerTodos = () => {
     DadosEsp32.removeAll()
       .then((response:any) => {
         Alert.alert('Messagem', response.toString())
@@ -67,6 +67,13 @@ const Main = ({ route }: any) => {
         Alert.alert('Erro', err)
         console.log(err)
       })
+  }
+
+  const removeAll = async () => {
+    Alert.alert('Perigo!', 'Deseja excluir todos os registros?', [
+      { text: 'Sim', onPress: () => removerTodos() },
+      { text: 'Não', onPress: () => console.log('Não deseja excluir todos os registros') }
+    ])
   }
 
   return (

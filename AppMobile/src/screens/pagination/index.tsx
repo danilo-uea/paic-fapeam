@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, Platform, Text, View } from 'react-native';
 import DateTimeInput from '../../components/DateTimeInput';
-import { CustomButton, CustomButtonText, ViewHorizontal } from './styles';
+import { ViewHorizontal } from './styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DadosEsp32 from '../../services/sqlite/DadosEsp32';
 import ButtonTopMenu from '../../components/ButtonTopMenu';
@@ -97,18 +97,25 @@ const Pagination = ({ route }: any) => {
     }
 
     const removerDataHora = (DataInicial:Date, DataFinal:Date) => {
-        let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
-        let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
+        Alert.alert('Perigo!', 'Deseja excluir todos os registros?', [
+            {
+                text: 'Sim', onPress: () => {
+                    let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
+                    let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
 
-        DadosEsp32.removeDateTime(dataInicial, dataFinal)
-            .then((response: any) => {
-                Alert.alert('Messagem', response.toString())
-                console.log(response)
-            })
-            .catch(err => {
-                Alert.alert('Erro', err)
-                console.log(err)
-            })
+                    DadosEsp32.removeDateTime(dataInicial, dataFinal)
+                        .then((response: any) => {
+                            Alert.alert('Messagem', response.toString())
+                            console.log(response)
+                        })
+                        .catch(err => {
+                            Alert.alert('Erro', err)
+                            console.log(err)
+                        })
+                }
+            },
+            { text: 'Não', onPress: () => console.log('Não deseja excluir todos os registros') }
+        ]);
     }
 
     return (
