@@ -27,32 +27,21 @@ const create = (Contador:string, DataHora:string, Fe:string, Rssi:string, Tamanh
   })
 }
 
-const all = () => {
+const countAll = () => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
-          "SELECT * FROM Bluetooth", [],
+          "SELECT COUNT(*) as Qtd FROM Bluetooth", [],
           (tx, results) => {
-            let list = [];
             let len = results.rows.length;
-            
+
             if (len > 0) {  
-              for (let i = 0; i < len; i++) {
-                let item = results.rows.item(i);
-                list.push({ 
-                  id: item.ID, 
-                  contador: item.Contador, 
-                  dataHora: item.DataHora, 
-                  // fe: item.Fe,
-                  // rssi: item.Rssi,
-                  // tamanho: item.Tamanho,
-                  // latitude: item.Latitude,
-                  // longitude: item.Longitude 
-                })
-              }
+              let item = results.rows.item(0).Qtd;
+              resolve(item)
+            } else {
+              resolve(0)
             }
-            resolve(list)
           }
         )
       })
@@ -214,7 +203,7 @@ const formatoDataFiltro = (data: Date) => {
 
 export default {
   create,
-  all,
+  countAll,
   allDateTime,
   get,
   removeId,

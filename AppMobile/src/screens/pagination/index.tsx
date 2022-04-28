@@ -8,6 +8,7 @@ import ButtonTopMenu from '../../components/ButtonTopMenu';
 
 const Pagination = ({ route }: any) => {
     // console.log(route.params?.name + ': ' + route.params?.id)
+    const [ total, setTotal ] = useState<number>(0)
 
     const [dateStart, setDateStart] = useState(new Date());
     const [dataInicialBr, setDataInicialBr] = useState<string>('');
@@ -64,7 +65,7 @@ const Pagination = ({ route }: any) => {
     }
 
     const listAll = () => {
-        DadosEsp32.all()
+        DadosEsp32.countAll()
             .then((response: any) => {
                 response?.forEach((element: any) => {
                     console.log(element)
@@ -86,6 +87,7 @@ const Pagination = ({ route }: any) => {
                 response?.forEach((element: any) => {
                     console.log(element)
                 });
+                setTotal(parseInt(response?.length))
                 console.log('Qtd: ' + response?.length)
             })
             .catch(err => {
@@ -147,6 +149,9 @@ const Pagination = ({ route }: any) => {
                 <ButtonTopMenu texto='Listar' tamanho='100px' onPress={() => listDataHora(dateStart, dateEnd)} />
                 <ButtonTopMenu texto='Exportar' tamanho='100px' onPress={null} />
                 <ButtonTopMenu texto='Excluir' tamanho='100px' onPress={() => removerDataHora(dateStart, dateEnd)} />
+            </ViewHorizontal>
+            <ViewHorizontal>
+                <Text>{ `Quantidade: ${total}` }</Text>
             </ViewHorizontal>
             {showInicial && (
                 <DateTimePicker

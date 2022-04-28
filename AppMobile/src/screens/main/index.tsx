@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
-import { Alert, Button, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Text, View } from 'react-native';
+import ButtonTopMenu from '../../components/ButtonTopMenu';
 import DadosEsp32 from '../../services/sqlite/DadosEsp32';
 
 const Main = ({ route }: any) => {
   // console.log(route.params?.name + ': ' + route.params?.id)
+  const [ total, setTotal ] = useState<number>(-1)
 
   useEffect(() => {
   }, [])
@@ -20,13 +22,11 @@ const Main = ({ route }: any) => {
       })
   }
 
-  const listAll = () => {
-    DadosEsp32.all()
+  const quantidadeRegistros = () => {
+    DadosEsp32.countAll()
       .then((response:any) => {
-        response?.forEach((element:any) => {
-          console.log(element)
-        });
-        console.log('Qtd: ' + response?.length)
+        setTotal(parseInt(response))
+        console.log('Qtd: ' + response)
       })
       .catch(err => {
         Alert.alert('Erro', err)
@@ -71,22 +71,9 @@ const Main = ({ route }: any) => {
 
   return (
     <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-      <Text>Início</Text>
-      {/* <Button title='Teste' onPress={() => addData('Miracelma', 60, '2022-04-23 20:13')} /> */}
-      {/* <Button title='Data' onPress={() => datas()} /> */}
-      <Button title='Listar' onPress={() => listAll()} />
-      {/* <Button title='Adicionar' onPress={() => addData(
-        '1236',
-        '2022-04-26 20:13:25', 
-        '7',
-        '-75',
-        '21',
-        '-3.030872',
-        '-59.970642',
-      )} /> */}
-      {/* <Button title='Pegar Id' onPress={() => getById(3)} /> */}
-      {/* <Button title='Remover' onPress={() => removeId(3)} /> */}
-      <Button title='Remover Todos' onPress={() => removeAll()} />
+      <Text style={{ fontSize: 20 }} >{ total >= 0 ? total : '' }</Text>
+      <ButtonTopMenu texto='Total' tamanho='100px' onPress={() => quantidadeRegistros()} />
+      <ButtonTopMenu texto='Excluir todos' tamanho='150px' onPress={() => removeAll()} />
     </View>
   );
 };
