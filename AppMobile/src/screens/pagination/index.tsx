@@ -147,7 +147,7 @@ const Pagination = () => {
                 <ButtonTopMenu texto='Excluir' tamanho='100px' onPress={() => removerDataHora(dateStart, dateEnd)} />
             </ViewHorizontal>
             <ViewHorizontal>
-                <Text>{ `Quantidade: ${listagem?.length}` }</Text>
+                <Text style={{ paddingBottom: 5 }} >{ `Quantidade: ${listagem?.length}` }</Text>
             </ViewHorizontal>
             <ScrollView>
                 {
@@ -168,7 +168,7 @@ const Pagination = () => {
                         )
                     })
                 }
-                <View style={{ marginTop: 160 }} />
+                <View style={{ marginTop: 170 }} />
             </ScrollView>
             {showInicial && (
                 <DateTimePicker
