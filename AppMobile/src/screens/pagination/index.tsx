@@ -8,7 +8,7 @@ import ButtonTopMenu from '../../components/ButtonTopMenu';
 
 const Pagination = ({ route }: any) => {
     // console.log(route.params?.name + ': ' + route.params?.id)
-    const [ total, setTotal ] = useState<number>(0)
+    const [ listagem, setListagem ] = useState<any>([]);
 
     const [dateStart, setDateStart] = useState(new Date());
     const [dataInicialBr, setDataInicialBr] = useState<string>('');
@@ -64,20 +64,6 @@ const Pagination = ({ route }: any) => {
         setModeFinal(currentMode);
     }
 
-    const listAll = () => {
-        DadosEsp32.countAll()
-            .then((response: any) => {
-                response?.forEach((element: any) => {
-                    console.log(element)
-                });
-                console.log('Qtd: ' + response?.length)
-            })
-            .catch(err => {
-                Alert.alert('Erro', err)
-                console.log(err)
-            })
-    }
-
     const listDataHora = (DataInicial:Date, DataFinal:Date) => {
         let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
         let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
@@ -87,11 +73,11 @@ const Pagination = ({ route }: any) => {
                 response?.forEach((element: any) => {
                     console.log(element)
                 });
-                setTotal(parseInt(response?.length))
                 console.log('Qtd: ' + response?.length)
+                setListagem(response)
             })
             .catch(err => {
-                Alert.alert('Erro', err)
+                Alert.alert('Erro', err.message.toString())
                 console.log(err)
             })
     }
@@ -109,7 +95,7 @@ const Pagination = ({ route }: any) => {
                             console.log(response)
                         })
                         .catch(err => {
-                            Alert.alert('Erro', err)
+                            Alert.alert('Erro', err.message.toString())
                             console.log(err)
                         })
                 }
@@ -158,8 +144,17 @@ const Pagination = ({ route }: any) => {
                 <ButtonTopMenu texto='Excluir' tamanho='100px' onPress={() => removerDataHora(dateStart, dateEnd)} />
             </ViewHorizontal>
             <ViewHorizontal>
-                <Text>{ `Quantidade: ${total}` }</Text>
+                <Text>{ `Quantidade: ${listagem?.length}` }</Text>
             </ViewHorizontal>
+            <View>
+                {
+                    listagem.map((element:any) => {
+                        return(
+                            <Text key={element.id}>{element.contador} {element.dataHora}</Text>
+                        )
+                    })
+                }
+            </View>
             {showInicial && (
                 <DateTimePicker
                     testID='dateTimePicker'

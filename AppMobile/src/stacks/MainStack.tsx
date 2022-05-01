@@ -32,6 +32,7 @@ const MainStack = () => {
     const [messageArray, setMessageArray] = useState<string[]>([]);
     const navigation = useNavigation<propsStack>();
     const [intervalId, setIntervalId] = useState<any>();
+    const [ erro, setErro ] = useState<string>('');
 
     useEffect(() => {
         splitString(message, ';')
@@ -42,10 +43,11 @@ const MainStack = () => {
             DadosEsp32.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6])
                 .then((response: any) => {
                     console.log(response)
+                    setErro('')
                 })
                 .catch(err => {
-                    Alert.alert('Erro', err)
                     console.log(err)
+                    setErro(err.message.toString())
                 })
         }
     }, [messageArray])
@@ -104,19 +106,6 @@ const MainStack = () => {
                     (error, characteristic) => {
                         if (characteristic?.value != null) {
                             setMessage(base64.decode(characteristic?.value));
-                            // 10082;17;4;2022;16:00:28;7;-75;21;-3.030872;-59.970642
-                            // dados_lora.contador, 
-                            // dados_lora.dia, 
-                            // dados_lora.mes, 
-                            // dados_lora.ano, 
-                            // dados_lora.hora, 
-                            // dados_lora.minuto, 
-                            // dados_lora.segundo, 
-                            // fatorE, 
-                            // lora_rssi, 
-                            // tam_pacote, 
-                            // dados_lora.f_latitude, 
-                            // dados_lora.f_longitude
                         }
                     },
                     'messagetransaction',
@@ -193,7 +182,7 @@ const MainStack = () => {
                     )}
                 </ViewHorizontal>
             </View>
-            {isConnected && messageArray.length === 7 ?
+            {isConnected && messageArray.length === 7 && erro === '' ?
                 (
                     <>
                         <Text style={{ fontSize: 15 }}>Contador: {messageArray[0]}</Text>
@@ -204,7 +193,18 @@ const MainStack = () => {
                         <Text style={{ fontSize: 15 }}>Latitude: {messageArray[5]}</Text>
                         <Text style={{ fontSize: 15 }}>Longitude: {messageArray[6]}</Text>
                     </>
-                ) : <></>
+                ) : 
+                    <>
+                        { erro !== '' ?
+                            <>
+                                <View style={{ alignItems: 'center', flexDirection: 'column' }}>
+                                    <Text style={{ color: 'red' }}>Erro</Text>
+                                </View>
+                                <Text style={{ color: 'red' }}>{erro}</Text>
+                            </>
+                        :   <></>
+                        }
+                    </>
             }
             <Stack.Navigator initialRouteName="Main"
                 screenOptions={{

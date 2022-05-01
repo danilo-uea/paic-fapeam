@@ -18,7 +18,8 @@ const create = (Contador:string, DataHora:string, Fe:string, Rssi:string, Tamanh
           "INSERT INTO Bluetooth (Contador, DataHora, Fe, Rssi, Tamanho, Latitude, Longitude) VALUES (?,?,?,?,?,?,?)", [Contador, DataHora, Fe, Rssi, Tamanho, Latitude, Longitude],
           (tx, results) => {
             resolve('Inserido com sucesso: ' + results.insertId)
-          }
+          },
+          error => { reject(error) }
         )
       })
     } catch (error) {
@@ -42,7 +43,8 @@ const countAll = () => {
             } else {
               resolve(0)
             }
-          }
+          },
+          error => { reject(error) }
         )
       })
     } catch (error) {
@@ -83,7 +85,8 @@ const allDateTime = (dataInicial:string, dataFinal:string) => {
               }
             }
             resolve(list)
-          }
+          },
+          error => { reject(error) }
         )
       })
     } catch (error) {
@@ -101,28 +104,20 @@ const get = (Id:number) => {
           (tx, results) => {
             let len = results.rows.length;
             if (len > 0) {
-              let id = results.rows.item(0).ID;
-              let contador = results.rows.item(0).Contador;
-              let dataHora = results.rows.item(0).DataHora;
-              let fe = results.rows.item(0).Fe;
-              let rssi = results.rows.item(0).Rssi;
-              let tamanho = results.rows.item(0).Tamanho;
-              let latitude = results.rows.item(0).Latitude;
-              let longitude = results.rows.item(0).Longitude;
-
               resolve({ 
-                id: id, 
-                contador: contador, 
-                dataHora: dataHora, 
-                fe: fe, 
-                rssi: rssi, 
-                tamanho: tamanho, 
-                latitude: latitude, 
-                longitude: longitude })
+                id: results.rows.item(0).ID, 
+                contador: results.rows.item(0).Contador, 
+                dataHora: results.rows.item(0).DataHora, 
+                fe: results.rows.item(0).Fe, 
+                rssi: results.rows.item(0).Rssi, 
+                tamanho: results.rows.item(0).Tamanho, 
+                latitude: results.rows.item(0).Latitude, 
+                longitude: results.rows.item(0).Longitude })
             } else {
               resolve(null)
             }
-          }
+          },
+          error => { reject(error) }
         )
       })
     } catch (error) {

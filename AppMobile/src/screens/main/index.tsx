@@ -7,21 +7,6 @@ const Main = ({ route }: any) => {
   // console.log(route.params?.name + ': ' + route.params?.id)
   const [ total, setTotal ] = useState<number>(-1)
 
-  useEffect(() => {
-  }, [])
-
-  const addData = async (Contador:string, DataHora:string, Fe:string, Rssi:string, Tamanho:string, Latitude:string, Longitude:string) => {
-    DadosEsp32.create(Contador, DataHora, Fe, Rssi, Tamanho, Latitude, Longitude)
-      .then((response:any) => {
-        Alert.alert('Messagem', response.toString())
-        console.log(response)
-      })
-      .catch(err => {
-        Alert.alert('Erro', err)
-        console.log(err)
-      })
-  }
-
   const quantidadeRegistros = () => {
     DadosEsp32.countAll()
       .then((response:any) => {
@@ -29,30 +14,7 @@ const Main = ({ route }: any) => {
         console.log('Qtd: ' + response)
       })
       .catch(err => {
-        Alert.alert('Erro', err)
-        console.log(err)
-      })
-  }
-
-  const getById = (Id:number) => {
-    DadosEsp32.get(Id)
-      .then(response => {
-        console.log(response)
-      })
-      .catch(err => {
-        Alert.alert('Erro', err)
-        console.log(err)
-      })
-  }
-
-  const removeId = async (Id:number) => {
-    DadosEsp32.removeId(Id)
-      .then((response:any) => {
-        Alert.alert('Messagem', response.toString())
-        console.log(response)
-      })
-      .catch(err => {
-        Alert.alert('Erro', err)
+        Alert.alert('Erro', err.message.toString())
         console.log(err)
       })
   }
