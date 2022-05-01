@@ -20,6 +20,7 @@ import { useNavigation } from '@react-navigation/native';
 import { propsNavigationStack } from './models';
 import { propsStack } from './models';
 import ButtonTopMenu from '../components/ButtonTopMenu';
+import Details from '../screens/details';
 
 const Stack = createNativeStackNavigator<propsNavigationStack>();
 
@@ -27,6 +28,7 @@ var cont: number = 1234;
 
 const MainStack = () => {
     const [isConnected, setIsConnected] = useState(false);
+    const [armazenar, setArmazenar] = useState(false);
     const [connectedDevice, setConnectedDevice] = useState<Device>();
     const [message, setMessage] = useState<string>('');
     const [messageArray, setMessageArray] = useState<string[]>([]);
@@ -37,10 +39,10 @@ const MainStack = () => {
     useEffect(() => {
         splitString(message, ';')
     }, [message])
-
+    
     useEffect(() => {
-        if (messageArray.length === 7) {
-            DadosEsp32.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6])
+        if (messageArray.length === 9 && armazenar) {
+            DadosEsp32.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8])
                 .then((response: any) => {
                     console.log(response)
                     setErro('')
@@ -55,7 +57,7 @@ const MainStack = () => {
     const splitString = (stringToSplit: string, separator: string) => {
         if (message !== '') {
             let arrayOfStrings = stringToSplit.split(separator);
-            if (arrayOfStrings.length === 7) {
+            if (arrayOfStrings.length === 9) {
                 setMessageArray(arrayOfStrings);
             }
         }
@@ -127,14 +129,6 @@ const MainStack = () => {
         }
     }
 
-    const pagePrincipal = () => {
-        navigation.navigate('Main', { name: 'Main', id: 1 });
-    }
-
-    const pagePaginacao = () => {
-        navigation.navigate('Pagination', { name: 'Pagination', id: 2 });
-    }
-
     const conectarMock = () => {
         if (intervalId) {
             clearInterval(intervalId);
@@ -148,7 +142,7 @@ const MainStack = () => {
                 `${DadosEsp32.zeroEsquerda(utcDate.getMonth() + 1)}-` + //Mês
                 `${DadosEsp32.zeroEsquerda(utcDate.getDate())} ` +      //Dia
                 `${utcDate.toLocaleTimeString()}`;                      //Hora:minuto:segundo
-            let message = cont.toString() + ';' + data + ';7;-75;21;-3.030872;-59.970642';
+            let message = cont.toString() + ';' + data + ';7;-75;21;-3.030872;-59.970642;-3.030444;-59.970444';
             setMessage(message)
         }, 1000);
 
@@ -169,10 +163,10 @@ const MainStack = () => {
 
     return (
         <>
-            <View style={{ marginTop: 10, marginBottom: 10 }}>
+            <View style={{ marginRight: 8, marginLeft: 8, marginTop: 10, marginBottom: 10 }}>
                 <ViewHorizontal>
-                    <ButtonTopMenu texto='Principal' tamanho='100px' onPress={pagePrincipal} />
-                    <ButtonTopMenu texto='Paginação' tamanho='110px' onPress={pagePaginacao} />
+                    <ButtonTopMenu texto='Principal' tamanho='90px' onPress={() => navigation.navigate('Main')} />
+                    <ButtonTopMenu texto='Paginação' tamanho='100px' onPress={() => navigation.navigate('Pagination')} />
                     {!isConnected ? (
                         // <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => scanDevices()} />
                         <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => conectarMock()} />
@@ -180,32 +174,41 @@ const MainStack = () => {
                         // <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => disconnectDevice()} />
                         <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => desconectarMock()} />
                     )}
+                    {armazenar ? (
+                        <ButtonTopMenu texto='On' tamanho='50px' onPress={() => setArmazenar(!armazenar)} />
+                    ) : (
+                        <ButtonTopMenu texto='Off' tamanho='50px' onPress={() => setArmazenar(!armazenar)} />
+                    )}
                 </ViewHorizontal>
             </View>
-            {isConnected && messageArray.length === 7 && erro === '' ?
-                (
-                    <>
-                        <Text style={{ fontSize: 15 }}>Contador: {messageArray[0]}</Text>
-                        <Text style={{ fontSize: 15 }}>Data: {messageArray[1]}</Text>
-                        <Text style={{ fontSize: 15 }}>Fator de Espalhamento: {messageArray[2]}</Text>
-                        <Text style={{ fontSize: 15 }}>RSSI: {messageArray[3]}</Text>
-                        <Text style={{ fontSize: 15 }}>Tamanho Pacote: {messageArray[4]} bytes</Text>
-                        <Text style={{ fontSize: 15 }}>Latitude: {messageArray[5]}</Text>
-                        <Text style={{ fontSize: 15 }}>Longitude: {messageArray[6]}</Text>
-                    </>
-                ) : 
-                    <>
-                        { erro !== '' ?
-                            <>
-                                <View style={{ alignItems: 'center', flexDirection: 'column' }}>
-                                    <Text style={{ color: 'red' }}>Erro</Text>
-                                </View>
-                                <Text style={{ color: 'red' }}>{erro}</Text>
-                            </>
-                        :   <></>
-                        }
-                    </>
-            }
+            <View style={{ marginRight: 8, marginLeft: 8, marginBottom: 5 }}>
+                {isConnected && messageArray.length === 9 && erro === '' ?
+                    (
+                        <>
+                            <Text style={{ fontSize: 15 }}>Contador: {messageArray[0]}</Text>
+                            <Text style={{ fontSize: 15 }}>Data: {messageArray[1]}</Text>
+                            <Text style={{ fontSize: 15 }}>Fator de Espalhamento: {messageArray[2]}</Text>
+                            <Text style={{ fontSize: 15 }}>RSSI: {messageArray[3]}</Text>
+                            <Text style={{ fontSize: 15 }}>Tamanho Pacote: {messageArray[4]} bytes</Text>
+                            <Text style={{ fontSize: 15 }}>Emissor Latitude: {messageArray[5]}</Text>
+                            <Text style={{ fontSize: 15 }}>Emissor Longitude: {messageArray[6]}</Text>
+                            <Text style={{ fontSize: 15 }}>Receptor Latitude: {messageArray[7]}</Text>
+                            <Text style={{ fontSize: 15 }}>Receptor Longitude: {messageArray[8]}</Text>
+                        </>
+                    ) : 
+                        <>
+                            { erro !== '' ?
+                                <>
+                                    <View style={{ alignItems: 'center', flexDirection: 'column' }}>
+                                        <Text style={{ color: 'red' }}>Erro</Text>
+                                    </View>
+                                    <Text style={{ color: 'red' }}>{erro}</Text>
+                                </>
+                            :   <></>
+                            }
+                        </>
+                }
+            </View>
             <Stack.Navigator initialRouteName="Main"
                 screenOptions={{
                     headerShown: false
@@ -213,6 +216,7 @@ const MainStack = () => {
             >
                 <Stack.Screen name="Main" component={Main} />
                 <Stack.Screen name="Pagination" component={Pagination} />
+                <Stack.Screen name="Details" component={Details} />
             </Stack.Navigator>
         </>
     )

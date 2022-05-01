@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Platform, Text, View } from 'react-native';
+import { Alert, Platform, ScrollView, Text, View } from 'react-native';
 import DateTimeInput from '../../components/DateTimeInput';
 import { ViewHorizontal } from './styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DadosEsp32 from '../../services/sqlite/DadosEsp32';
 import ButtonTopMenu from '../../components/ButtonTopMenu';
+import { useNavigation } from '@react-navigation/native';
+import { propsStack } from '../../stacks/models';
 
-const Pagination = ({ route }: any) => {
-    // console.log(route.params?.name + ': ' + route.params?.id)
+const Pagination = () => {
     const [ listagem, setListagem ] = useState<any>([]);
 
     const [dateStart, setDateStart] = useState(new Date());
@@ -22,6 +23,8 @@ const Pagination = ({ route }: any) => {
     const [modeFinal, setModeFinal] = useState<any>('date');
     const [showInicial, setShowInicial] = useState(false);
     const [showFinal, setShowFinal] = useState(false);
+
+    const navigation = useNavigation<propsStack>();
 
     useEffect(() => {
         onChangeInicial('', dateStart);
@@ -70,10 +73,10 @@ const Pagination = ({ route }: any) => {
 
         DadosEsp32.allDateTime(dataInicial, dataFinal)
             .then((response: any) => {
-                response?.forEach((element: any) => {
-                    console.log(element)
-                });
-                console.log('Qtd: ' + response?.length)
+                // response?.forEach((element: any) => {
+                //     console.log(element)
+                // });
+                // console.log('Qtd: ' + response?.length)
                 setListagem(response)
             })
             .catch(err => {
@@ -105,7 +108,7 @@ const Pagination = ({ route }: any) => {
     }
 
     return (
-        <View>
+        <View style={{ marginRight: 8, marginLeft: 8 }}>
             <ViewHorizontal>
                 <View style={{ marginRight: 10 }}>
                     <Text>Inicial</Text>
@@ -146,15 +149,27 @@ const Pagination = ({ route }: any) => {
             <ViewHorizontal>
                 <Text>{ `Quantidade: ${listagem?.length}` }</Text>
             </ViewHorizontal>
-            <View>
+            <ScrollView>
                 {
                     listagem.map((element:any) => {
                         return(
-                            <Text key={element.id}>{element.contador} {element.dataHora}</Text>
+                            <Text 
+                                style={{
+                                    borderBottomColor: '#D8D3D3',
+                                    borderBottomWidth: 1,
+                                    paddingTop: 5,
+                                    paddingBottom: 5
+                                }} 
+                                key={element.id}
+                                onPress={() => navigation.navigate('Details', { id: element.id })}
+                            >
+                                {element.contador} {element.fe} {element.dataHora}
+                            </Text>
                         )
                     })
                 }
-            </View>
+                <View style={{ marginTop: 160 }} />
+            </ScrollView>
             {showInicial && (
                 <DateTimePicker
                     testID='dateTimePicker'

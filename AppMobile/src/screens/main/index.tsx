@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import ButtonTopMenu from '../../components/ButtonTopMenu';
 import DadosEsp32 from '../../services/sqlite/DadosEsp32';
 
-const Main = ({ route }: any) => {
-  // console.log(route.params?.name + ': ' + route.params?.id)
+const Main = () => {
   const [ total, setTotal ] = useState<number>(-1)
 
   const quantidadeRegistros = () => {
@@ -26,7 +25,7 @@ const Main = ({ route }: any) => {
         console.log(response)
       })
       .catch(err => {
-        Alert.alert('Erro', err)
+        Alert.alert('Erro', err.message.toString())
         console.log(err)
       })
   }

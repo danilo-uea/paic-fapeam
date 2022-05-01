@@ -6,16 +6,17 @@ db.transaction((tx) => {
     tx.executeSql(
         "CREATE TABLE IF NOT EXISTS "
         + "Bluetooth "
-        + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Contador INTEGER, DataHora DATETIME, Fe INTEGER, Rssi INTEGER, Tamanho INTEGER, Latitude REAL, Longitude REAL)"
+        + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Contador INTEGER, DataHora DATETIME, Fe INTEGER, Rssi INTEGER, Tamanho INTEGER, LatitudeEmissor REAL, LongitudeEmissor REAL, LatitudeReceptor REAL, LongitudeReceptor REAL)"
     )
 })
 
-const create = (Contador:string, DataHora:string, Fe:string, Rssi:string, Tamanho:string, Latitude:string, Longitude:string) => {
+const create = (Contador:string, DataHora:string, Fe:string, Rssi:string, Tamanho:string, LatitudeEmissor:string, LongitudeEmissor:string, LatitudeReceptor:string, LongitudeReceptor:string) => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
-          "INSERT INTO Bluetooth (Contador, DataHora, Fe, Rssi, Tamanho, Latitude, Longitude) VALUES (?,?,?,?,?,?,?)", [Contador, DataHora, Fe, Rssi, Tamanho, Latitude, Longitude],
+          "INSERT INTO Bluetooth (Contador, DataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor) VALUES (?,?,?,?,?,?,?,?,?)", 
+          [Contador, DataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor],
           (tx, results) => {
             resolve('Inserido com sucesso: ' + results.insertId)
           },
@@ -57,7 +58,7 @@ const allDateTime = (dataInicial:string, dataFinal:string) => {
   return new Promise(async (resolve, reject) => {
     try {
       let query = 
-        "SELECT ID, Contador, DataHora " + 
+        "SELECT ID, Contador, DataHora, Fe " + 
         "FROM Bluetooth " + 
         "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " + 
         "AND strftime('%Y-%m-%d %H:%M:%S', DataHora) <= strftime('%Y-%m-%d %H:%M:%S', ?)";
@@ -76,7 +77,7 @@ const allDateTime = (dataInicial:string, dataFinal:string) => {
                   id: item.ID, 
                   contador: item.Contador, 
                   dataHora: item.DataHora, 
-                  // fe: item.Fe,
+                  fe: item.Fe,
                   // rssi: item.Rssi,
                   // tamanho: item.Tamanho,
                   // latitude: item.Latitude,
@@ -100,7 +101,7 @@ const get = (Id:number) => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
-          "SELECT ID, Contador, DataHora, Fe, Rssi, Tamanho, Latitude, Longitude FROM Bluetooth WHERE ID = ?", [Id],
+          "SELECT ID, Contador, DataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor FROM Bluetooth WHERE ID = ?", [Id],
           (tx, results) => {
             let len = results.rows.length;
             if (len > 0) {
@@ -111,8 +112,10 @@ const get = (Id:number) => {
                 fe: results.rows.item(0).Fe, 
                 rssi: results.rows.item(0).Rssi, 
                 tamanho: results.rows.item(0).Tamanho, 
-                latitude: results.rows.item(0).Latitude, 
-                longitude: results.rows.item(0).Longitude })
+                latitudeEmissor: results.rows.item(0).LatitudeEmissor, 
+                longitudeEmissor: results.rows.item(0).LongitudeEmissor,
+                latitudeReceptor: results.rows.item(0).LatitudeReceptor,
+                longitudeReceptor: results.rows.item(0).LongitudeReceptor })
             } else {
               resolve(null)
             }
