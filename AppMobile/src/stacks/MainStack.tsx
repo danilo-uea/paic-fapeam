@@ -41,8 +41,8 @@ const MainStack = () => {
     }, [message])
     
     useEffect(() => {
-        if (messageArray.length === 9 && armazenar) {
-            DadosEsp32.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8])
+        if (messageArray.length === 10 && armazenar) {
+            DadosEsp32.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8], messageArray[9])
                 .then((response: any) => {
                     console.log(response)
                     setErro('')
@@ -58,6 +58,16 @@ const MainStack = () => {
         if (message !== '') {
             let arrayOfStrings = stringToSplit.split(separator);
             if (arrayOfStrings.length === 9) {
+                let utcDate = new Date();
+
+                let data =
+                    `${utcDate.getFullYear()}-` +                           //Ano
+                    `${DadosEsp32.zeroEsquerda(utcDate.getMonth() + 1)}-` + //Mês
+                    `${DadosEsp32.zeroEsquerda(utcDate.getDate())} ` +      //Dia
+                    `${utcDate.toLocaleTimeString()}`;                      //Hora:minuto:segundo
+                
+                arrayOfStrings.push(data)
+
                 setMessageArray(arrayOfStrings);
             }
         }
@@ -136,13 +146,7 @@ const MainStack = () => {
 
         var Id = setInterval(() => {
             cont++;
-            let utcDate = new Date();
-            let data =
-                `${utcDate.getFullYear()}-` +                           //Ano
-                `${DadosEsp32.zeroEsquerda(utcDate.getMonth() + 1)}-` + //Mês
-                `${DadosEsp32.zeroEsquerda(utcDate.getDate())} ` +      //Dia
-                `${utcDate.toLocaleTimeString()}`;                      //Hora:minuto:segundo
-            let message = cont.toString() + ';' + data + ';7;-75;21;-3.030872;-59.970642;-3.030444;-59.970444';
+            let message = cont.toString() + ';2022-05-08 13:20:15;7;-75;21;-3.030872;-59.970642;-3.030444;-59.970444';
             setMessage(message)
         }, 1000);
 
@@ -182,11 +186,11 @@ const MainStack = () => {
                 </ViewHorizontal>
             </View>
             <View style={{ marginRight: 8, marginLeft: 8, marginBottom: 5 }}>
-                {isConnected && messageArray.length === 9 && erro === '' ?
+                {isConnected && messageArray.length === 10 && erro === '' ?
                     (
                         <>
                             <Text style={{ fontSize: 15 }}>Contador: {messageArray[0]}</Text>
-                            <Text style={{ fontSize: 15 }}>Data: {messageArray[1]}</Text>
+                            <Text style={{ fontSize: 15 }}>Satélite Data: {messageArray[1]}</Text>
                             <Text style={{ fontSize: 15 }}>Fator de Espalhamento: {messageArray[2]}</Text>
                             <Text style={{ fontSize: 15 }}>RSSI: {messageArray[3]}</Text>
                             <Text style={{ fontSize: 15 }}>Tamanho Pacote: {messageArray[4]} bytes</Text>
@@ -194,6 +198,7 @@ const MainStack = () => {
                             <Text style={{ fontSize: 15 }}>Emissor Longitude: {messageArray[6]}</Text>
                             <Text style={{ fontSize: 15 }}>Receptor Latitude: {messageArray[7]}</Text>
                             <Text style={{ fontSize: 15 }}>Receptor Longitude: {messageArray[8]}</Text>
+                            <Text style={{ fontSize: 15 }}>Data: {messageArray[9]}</Text>
                         </>
                     ) : 
                         <>

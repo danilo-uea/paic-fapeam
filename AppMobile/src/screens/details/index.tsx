@@ -26,7 +26,7 @@ const Details = ({ route }: any) => {
                 <View style={{ marginBottom: 15, marginTop: 15 }}>
                     <Text>Id: {obj.id}</Text>
                     <Text>Contador: {obj.contador}</Text>
-                    <Text>Data Hora: {obj.dataHora}</Text>
+                    <Text>Satélite Data Hora: {obj.sateliteDataHora}</Text>
                     <Text>Fator de Espalhamento: {obj.fe}</Text>
                     <Text>RSSI: {obj.rssi}</Text>
                     <Text>Tamanho do pacote: {obj.tamanho} [bytes]</Text>
@@ -34,6 +34,7 @@ const Details = ({ route }: any) => {
                     <Text>Emissor Longitude: {obj.longitudeEmissor}</Text>
                     <Text>Receptor Latitude: {obj.latitudeReceptor}</Text>
                     <Text>Receptor Longitude: {obj.longitudeReceptor}</Text>
+                    <Text>Data Hora: {obj.dataHora}</Text>
                 </View>
             : <></>
             }
