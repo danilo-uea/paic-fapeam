@@ -37,11 +37,49 @@ const Main = () => {
     ])
   }
 
+  const gerarArquivoTxt = () => {
+    // require the module
+    var RNFS = require('react-native-fs');
+
+    var path = RNFS.DocumentDirectoryPath + '/test.txt';
+
+    // write the file
+    RNFS.writeFile(path, 'Lorem ipsum dolor sit amet', 'utf8')
+      .then((success:any) => {
+        console.log('Criado com sucesso: ' + path)
+      })
+      .catch((err:any) => {
+        console.log(err.message);
+      });
+  }
+
+  const listarArquivo = () => {
+    var RNFS = require('react-native-fs');
+
+    // get a list of files and directories in the main bundle
+    RNFS.readDir('/data/user/0/com.appmobile/files/') // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined)
+      .then((result:any) => {
+        result.forEach((element:any) => {
+          console.log(element.path)
+        });
+      })
+      .catch((err:any) => {
+        console.log(err.message, err.code);
+      });
+  }
+
+  const baixarArquivo = () => {
+    
+  }
+
   return (
     <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
       <Text style={{ fontSize: 20 }} >{ total >= 0 ? total : '' }</Text>
       <ButtonTopMenu texto='Total' tamanho='100px' onPress={() => quantidadeRegistros()} />
       <ButtonTopMenu texto='Excluir todos' tamanho='150px' onPress={() => removeAll()} />
+      <ButtonTopMenu texto='Gerar Arquivo' tamanho='150px' onPress={() => gerarArquivoTxt()} />
+      <ButtonTopMenu texto='Listar Arquivo' tamanho='160px' onPress={() => listarArquivo()} />
+      <ButtonTopMenu texto='Baixar Arquivo' tamanho='160px' onPress={() => baixarArquivo()} />
     </View>
   );
 };
