@@ -107,6 +107,13 @@ const Pagination = () => {
         ]);
     }
 
+    const exportar = (DataInicial:Date, DataFinal:Date) => {
+        let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
+        let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
+
+        navigation.navigate('Export', { dataInicial: dataInicial, dataFinal: dataFinal })
+    }
+
     return (
         <View style={{ marginRight: 8, marginLeft: 8 }}>
             <ViewHorizontal>
@@ -143,7 +150,7 @@ const Pagination = () => {
             </ViewHorizontal>
             <ViewHorizontal>
                 <ButtonTopMenu texto='Listar' tamanho='100px' onPress={() => listDataHora(dateStart, dateEnd)} />
-                <ButtonTopMenu texto='Exportar' tamanho='100px' onPress={null} />
+                <ButtonTopMenu texto='Exportar' tamanho='100px' onPress={() => exportar(dateStart, dateEnd)} />
                 <ButtonTopMenu texto='Excluir' tamanho='100px' onPress={() => removerDataHora(dateStart, dateEnd)} />
             </ViewHorizontal>
             <ViewHorizontal>

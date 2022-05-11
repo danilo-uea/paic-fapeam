@@ -6,6 +6,10 @@ export type propsNavigationStack = {
     Details?: {
         id: number
     }
+    Export?: {
+        dataInicial: string,
+        dataFinal: string
+    }
 }
 
 export type propsStack = NativeStackNavigationProp<propsNavigationStack>

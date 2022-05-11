@@ -15,12 +15,13 @@ LogBox.ignoreAllLogs();                        //Ignore all log notifications
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Main from '../screens/main';
 import Pagination from '../screens/pagination';
+import Details from '../screens/details';
+import Export from '../screens/export';
 import { ViewHorizontal } from './styles';
 import { useNavigation } from '@react-navigation/native';
 import { propsNavigationStack } from './models';
 import { propsStack } from './models';
 import ButtonTopMenu from '../components/ButtonTopMenu';
-import Details from '../screens/details';
 
 const Stack = createNativeStackNavigator<propsNavigationStack>();
 
@@ -222,6 +223,7 @@ const MainStack = () => {
                 <Stack.Screen name="Main" component={Main} />
                 <Stack.Screen name="Pagination" component={Pagination} />
                 <Stack.Screen name="Details" component={Details} />
+                <Stack.Screen name="Export" component={Export} />
             </Stack.Navigator>
         </>
     )
