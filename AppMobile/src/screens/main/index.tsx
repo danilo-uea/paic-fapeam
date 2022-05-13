@@ -41,7 +41,7 @@ const Main = () => {
     // require the module
     var RNFS = require('react-native-fs');
 
-    var path = RNFS.ExternalStorageDirectoryPath + '/Download/test.txt';
+    var path = RNFS.ExternalStorageDirectoryPath + '/Download/test5.txt';
 
     // write the file
     RNFS.writeFile(path, 'Testando esta escrita\nTestando de novo', 'utf8')
@@ -56,11 +56,10 @@ const Main = () => {
   const listarArquivo = () => {
     var RNFS = require('react-native-fs');
 
-    // get a list of files and directories in the main bundle
-    RNFS.readDir(RNFS.ExternalStorageDirectoryPath +  '/Download/') // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined)
+    RNFS.readDir(RNFS.ExternalStorageDirectoryPath +  '/Download/')
       .then((result:any) => {
         result.forEach((element:any) => {
-          console.log(element.name)
+          console.log(element.path)
         });
       })
       .catch((err:any) => {
@@ -70,14 +69,21 @@ const Main = () => {
 
   const deletarArquivo = () => {
     var RNFS = require('react-native-fs');
-    var path = RNFS.ExternalStorageDirectoryPath + '/Download/test.txt';
-
-    return RNFS.unlink(path)
-      .then(() => {
-        console.log('FILE DELETED');
+    
+    RNFS.readDir(RNFS.ExternalStorageDirectoryPath +  '/Download/')
+      .then((result: any) => {
+        result.forEach((element: any) => {
+          RNFS.unlink(element.path)
+            .then(() => {
+              console.log('Arquivo deletado: ' + element.name);
+            })
+            .catch((err: any) => {
+              console.log(err.message);
+            });
+        });
       })
       .catch((err:any) => {
-        console.log(err.message);
+        console.log(err.message, err.code);
       });
   }
 
@@ -88,7 +94,7 @@ const Main = () => {
       <ButtonTopMenu texto='Excluir todos' tamanho='150px' onPress={() => removeAll()} />
       <ButtonTopMenu texto='Gerar Arquivo' tamanho='150px' onPress={() => gerarArquivoTxt()} />
       <ButtonTopMenu texto='Listar Arquivo' tamanho='160px' onPress={() => listarArquivo()} />
-      <ButtonTopMenu texto='Deletar Arquivo' tamanho='160px' onPress={() => deletarArquivo()} />
+      <ButtonTopMenu texto='Deletar Arquivos' tamanho='160px' onPress={() => deletarArquivo()} />
     </View>
   );
 };
