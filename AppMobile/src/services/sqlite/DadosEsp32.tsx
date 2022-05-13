@@ -96,6 +96,51 @@ const allDateTime = (dataInicial:string, dataFinal:string) => {
   })
 }
 
+const listToExport = (dataInicial:string, dataFinal:string) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let query = 
+        "SELECT ID, Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, DataHora " + 
+        "FROM Bluetooth " + 
+        "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " + 
+        "AND strftime('%Y-%m-%d %H:%M:%S', DataHora) <= strftime('%Y-%m-%d %H:%M:%S', ?)";
+
+      await db.transaction(async (tx) => {
+        await tx.executeSql(
+          query, [dataInicial, dataFinal],
+          (tx, results) => {
+            let list = [];
+            let len = results.rows.length;
+            
+            if (len > 0) {  
+              for (let i = 0; i < len; i++) {
+                let item = results.rows.item(i);
+                list.push({ 
+                  id: item.ID, 
+                  contador: item.Contador, 
+                  sateliteDataHora: item.SateliteDataHora,
+                  fe: item.Fe,
+                  rssi: item.Rssi,
+                  tamanho: item.Tamanho,
+                  latitudeEmissor: item.LatitudeEmissor,
+                  longitudeEmissor: item.LongitudeEmissor,
+                  latitudeReceptor: item.LatitudeReceptor,
+                  longitudeReceptor: item.LongitudeReceptor,
+                  dataHora: item.DataHora
+                })
+              }
+            }
+            resolve(list)
+          },
+          error => { reject(error) }
+        )
+      })
+    } catch (error) {
+      reject(error);
+    }
+  })
+}
+
 const get = (Id:number) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -209,5 +254,6 @@ export default {
   removeDateTime,
   removeAll,
   zeroEsquerda,
-  formatoDataFiltro
+  formatoDataFiltro,
+  listToExport
 }
