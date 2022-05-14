@@ -173,11 +173,11 @@ const MainStack = () => {
                     <ButtonTopMenu texto='Principal' tamanho='90px' onPress={() => navigation.navigate('Main')} />
                     <ButtonTopMenu texto='Paginação' tamanho='100px' onPress={() => navigation.navigate('Pagination')} />
                     {!isConnected ? (
-                        // <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => scanDevices()} />
-                        <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => conectarMock()} />
+                        <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => scanDevices()} />
+                        // <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => conectarMock()} />
                     ) : (
-                        // <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => disconnectDevice()} />
-                        <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => desconectarMock()} />
+                        <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => disconnectDevice()} />
+                        // <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => desconectarMock()} />
                     )}
                     {armazenar ? (
                         <ButtonTopMenu texto='On' tamanho='50px' onPress={() => setArmazenar(!armazenar)} />
