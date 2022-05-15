@@ -34,6 +34,7 @@
 #define CHARACTERISTIC_UUID_TX "6d68efe5-04b6-4a85-abc4-c2670b7bf7fd"
 
 /* Pinagem para o fator de espalhamento */
+int readPot = 0;
 int fatorE = 7;     /* Valor do fator de espalhamento */
 int fatorE_ant = 7; /* Valor do fator de espalhamento anterior */
 int pinoPOT = 13;   /* Potenciômetro do fator de espalhamento */
@@ -107,6 +108,9 @@ void StartBluetoothBle(){
 
 void aguardando_dados_display() {
   /* Imprimir mensagem dizendo para esperar a chegada dos dados */
+  Serial.print("Aguardando dados... F.E: ");
+  Serial.println(fatorE);
+  
   display.clearDisplay();
   display.setCursor(0, 0);
   display.println("Aguardando dados...");
@@ -156,10 +160,10 @@ void escreve_medicoes_display(TDadosLora dados_lora, int lora_rssi)
 
   if (deviceConnected){
     display.setCursor(0, 50);
-    display.println("Status Ble: enviando");
+    display.println("Ble enviando");
   } else {
     display.setCursor(0, 50);
-    display.println("Status Ble: sem conexão");
+    display.println("Ble sem conexao");
   }
   
   display.display();
@@ -170,7 +174,7 @@ void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote)
   char mensagem[80];
   
   memset(mensagem,0,sizeof(mensagem));
-  sprintf(mensagem,"%d;%d-%02d-%02d %02d:%02d:%02d;%d;%d;%d;%.6f;%.6f", 
+  sprintf(mensagem,"%d;%d-%02d-%02d %02d:%02d:%02d;%d;%d;%d;%.6f;%.6f;-3.030444;-59.970444", 
     dados_lora.contador, 
     dados_lora.ano,
     dados_lora.mes,
@@ -236,10 +240,7 @@ void setup()
 {
   /* Monitor Serial */
   Serial.begin(115200);
-
-  /* Iniciando Bluetooth BLE */
-  StartBluetoothBle();
-
+  
   /* Preparando a inicialização do display OLED */
   pinMode(OLED_RST, OUTPUT);
   digitalWrite(OLED_RST, LOW);
@@ -259,13 +260,17 @@ void setup()
 
   while(init_comunicacao_lora() == false); /* Tenta, até obter sucesso na comunicacao com o chip LoRa */
 
-  /* Imprimir mensagem dizendo para esperar a chegada dos dados */
-  Serial.println("Aguardando dados...");
-  aguardando_dados_display();
-  
+  /* Iniciando Bluetooth BLE */
+  StartBluetoothBle();
+
   /* Pino de entrada do potenciômetro */
   pinMode(pinoPOT, INPUT);
+
+  /* Imprimir mensagem dizendo para esperar a chegada dos dados */
+  aguardando_dados_display();
 }
+
+unsigned long tempoAntes = millis();
 
 void loop()
 { 
@@ -277,12 +282,22 @@ void loop()
   unsigned long idade;
   bool newData = false;
 
-  /* Fator de Espalhamento */
-  fatorE = analogRead(pinoPOT);
-  fatorE = map(fatorE, 0, 4095, 7, 12);
+  /* Executar depois de 200 milisegundos. Devido a uma oscilação causado pelo BLE */
+  if (millis() - tempoAntes > 200)
+  {
+    /* Leitura da entrada do potenciômetro */
+    readPot = analogRead(pinoPOT);
+    tempoAntes = millis();
+  }
+
+  /* Mapeando o fator de espalhamento */
+  fatorE = map(readPot, 0, 4095, 7, 12);
+  
+  /* Caso ocorra uma mudança de fator de espalhamento */
   if (fatorE != fatorE_ant) {
     aguardando_dados_display();
   }
+  
   fatorE_ant =  fatorE;
 
   /* Fator de Espalhamento */
@@ -290,7 +305,7 @@ void loop()
 
   tam_pacote = LoRa.parsePacket(); /* Verifica se chegou alguma informação do tamanho esperado */
 
-  if (tam_pacote == sizeof(TDadosLora)) {               
+  if (tam_pacote == sizeof(TDadosLora)) {
     ptInformaraoRecebida = (char *)&dados_lora; /* Recebe os dados conforme protocolo */
     while (LoRa.available()) 
     {

@@ -28,6 +28,7 @@ const Stack = createNativeStackNavigator<propsNavigationStack>();
 var cont: number = 1234;
 
 const MainStack = () => {
+    const [insistir, setInsistir] = useState<boolean>(false);
     const [isConnected, setIsConnected] = useState(false);
     const [armazenar, setArmazenar] = useState(false);
     const [connectedDevice, setConnectedDevice] = useState<Device>();
@@ -77,20 +78,22 @@ const MainStack = () => {
     async function scanDevices() {
         BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
             if (error) {
-                console.warn(error);
+                console.log(error);
+                setErro(error.message.toString())
+            } else {
+                setErro('')
             }
 
             if (scannedDevice && scannedDevice.name == 'ESP32') {
                 BLTManager.stopDeviceScan();
-                console.log('Conectou');
                 connectDevice(scannedDevice);
             }
         });
 
-        setTimeout(() => {
-            console.log('Parou o escaneamento')
-            BLTManager.stopDeviceScan();
-        }, 5000);
+        // setTimeout(() => {
+        //     console.log('Parou o escaneamento')
+        //     BLTManager.stopDeviceScan();
+        // }, 5000);
     }
 
     async function connectDevice(device: Device) {
@@ -105,6 +108,7 @@ const MainStack = () => {
                 return device.discoverAllServicesAndCharacteristics();
             })
             .then(device => {
+                console.log('Conectou');
                 setConnectedDevice(device);
                 setIsConnected(true);
 
@@ -166,24 +170,45 @@ const MainStack = () => {
         setIsConnected(false);
     }
 
+    useEffect(() => {
+        if (insistir) {
+            if (!isConnected) {
+                scanDevices()
+                // conectarMock()
+            }
+        } else {
+            BLTManager.stopDeviceScan();
+            if (isConnected){
+                disconnectDevice()
+                // desconectarMock()
+            }
+        }
+    }, [insistir, isConnected])
+
     return (
         <>
             <View style={{ marginRight: 8, marginLeft: 8, marginTop: 10, marginBottom: 10 }}>
                 <ViewHorizontal>
                     <ButtonTopMenu texto='Principal' tamanho='90px' onPress={() => navigation.navigate('Main')} />
                     <ButtonTopMenu texto='Paginação' tamanho='100px' onPress={() => navigation.navigate('Pagination')} />
-                    {!isConnected ? (
-                        <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => scanDevices()} />
-                        // <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => conectarMock()} />
+                    {!insistir ? (
+                        <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => setInsistir(true)} />
                     ) : (
-                        <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => disconnectDevice()} />
-                        // <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => desconectarMock()} />
+                        <ButtonTopMenu texto='Liberar' tamanho='120px' onPress={() => setInsistir(false)} />
                     )}
                     {armazenar ? (
                         <ButtonTopMenu texto='On' tamanho='50px' onPress={() => setArmazenar(!armazenar)} />
                     ) : (
                         <ButtonTopMenu texto='Off' tamanho='50px' onPress={() => setArmazenar(!armazenar)} />
                     )}
+                </ViewHorizontal>
+                <ViewHorizontal style={{
+                    borderBottomColor: '#D8D3D3',
+                    borderBottomWidth: 1,
+                    paddingTop: 5,
+                    paddingBottom: 5
+                }} >
+                    <Text>Status Bluetooth: {isConnected ? 'Conectado' : 'Desconectado'}</Text>
                 </ViewHorizontal>
             </View>
             <View style={{ marginRight: 8, marginLeft: 8, marginBottom: 5 }}>
