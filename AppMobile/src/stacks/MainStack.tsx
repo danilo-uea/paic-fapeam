@@ -188,27 +188,28 @@ const MainStack = () => {
     return (
         <>
             <View style={{ marginRight: 8, marginLeft: 8, marginTop: 10, marginBottom: 10 }}>
-                <ViewHorizontal>
-                    <ButtonTopMenu texto='Principal' tamanho='90px' onPress={() => navigation.navigate('Main')} />
-                    <ButtonTopMenu texto='Paginação' tamanho='100px' onPress={() => navigation.navigate('Pagination')} />
+                <ViewHorizontal style={{ paddingBottom: 5 }}>
+                    <ButtonTopMenu texto='Principal' tamanho='180px' onPress={() => navigation.navigate('Main')} />
+                    <ButtonTopMenu texto='Paginação' tamanho='180px' onPress={() => navigation.navigate('Pagination')} />
+                </ViewHorizontal>
+                <ViewHorizontal style={{
+                    borderTopColor: '#D8D3D3',
+                    borderTopWidth: 1,
+                    paddingTop: 5
+                }}>
                     {!insistir ? (
                         <ButtonTopMenu texto='Conectar' tamanho='100px' onPress={() => setInsistir(true)} />
                     ) : (
-                        <ButtonTopMenu texto='Liberar' tamanho='120px' onPress={() => setInsistir(false)} />
+                        <ButtonTopMenu texto='Desconectar' tamanho='120px' onPress={() => setInsistir(false)} />
                     )}
                     {armazenar ? (
                         <ButtonTopMenu texto='On' tamanho='50px' onPress={() => setArmazenar(!armazenar)} />
                     ) : (
                         <ButtonTopMenu texto='Off' tamanho='50px' onPress={() => setArmazenar(!armazenar)} />
                     )}
-                </ViewHorizontal>
-                <ViewHorizontal style={{
-                    borderBottomColor: '#D8D3D3',
-                    borderBottomWidth: 1,
-                    paddingTop: 5,
-                    paddingBottom: 5
-                }} >
-                    <Text>Status Bluetooth: {isConnected ? 'Conectado' : 'Desconectado'}</Text>
+                    <View style={{ alignItems: 'center', flexDirection: 'column', justifyContent: 'center', flex: 1 }}>
+                        <Text>Bluetooth: {isConnected ? 'Conectado' : 'Desconectado'}</Text>
+                    </View>
                 </ViewHorizontal>
             </View>
             <View style={{ marginRight: 8, marginLeft: 8, marginBottom: 5 }}>
