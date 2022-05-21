@@ -13,6 +13,9 @@
 #include <BLEUtils.h>
 #include <BLE2902.h>
 
+/* Header-file com as funções utilizadas para manipulação da partição NVS */
+#include "nvs_flash.h"  
+
 /* Pinagem para o Display Oled */
 #define OLED_SDA 4
 #define OLED_SCL 15
@@ -33,11 +36,12 @@
 #define SERVICE_UUID           "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID_TX "6d68efe5-04b6-4a85-abc4-c2670b7bf7fd"
 
+/* Chave atribuida ao valor a ser escrito e lido da partição NVS */
+#define CHAVE_NVS  "teste"
+
 /* Pinagem para o fator de espalhamento */
-int readPot = 0;
-int fatorE = 7;     /* Valor do fator de espalhamento */
-int fatorE_ant = 7; /* Valor do fator de espalhamento anterior */
-int pinoPOT = 13;   /* Potenciômetro do fator de espalhamento */
+uint32_t fatorE = 7;     /* Valor do fator de espalhamento */
+int pinoBotao = 0;  /* Valor do pino do botão */
 
 /* Definicões do Display OLED */
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
@@ -76,6 +80,8 @@ void aguardando_dados_display();
 void escreve_medicoes_display(TDadosLora dados_lora, int lora_rssi);
 void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote);
 bool init_comunicacao_lora(void);
+void grava_dado_nvs(uint32_t dado);
+uint32_t le_dado_nvs(void);
 
 void StartBluetoothBle(){
   /* Criar o BLE Device */
@@ -158,6 +164,7 @@ void escreve_medicoes_display(TDadosLora dados_lora, int lora_rssi)
   display.print("Lon: ");
   display.println(str_flon);
 
+  /* Conexão Bluetooth BLE */
   if (deviceConnected){
     display.setCursor(0, 50);
     display.println("Ble enviando");
@@ -189,16 +196,13 @@ void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote)
     dados_lora.f_longitude);
 
   Serial.print(mensagem);
-  
-  if (deviceConnected){
+
+  /* Conexão Bluetooth BLE */
+  if (deviceConnected) {
     Serial.println(" (enviando)");
     
-    /* Definindo o valor para a característica */
-    pCharacteristic->setValue(mensagem);
-
-    /* Notificar o cliente conectado */
-    pCharacteristic->notify();
-    
+    pCharacteristic->setValue(mensagem); /* Definindo o valor para a característica */
+    pCharacteristic->notify();           /* Notificar o cliente conectado */
   } else {
     Serial.println(" (sem conexão)");
   }
@@ -214,7 +218,7 @@ bool init_comunicacao_lora(void)
     if (!LoRa.begin(BAND)) {
       status_init = false;
       
-      //Serial.println("[LoRa Receptor] Comunicacao com o radio LoRa falhou. Nova tentativa em 1 segundo...");        
+      Serial.println("[LoRa Receptor] Comunicacao com o radio LoRa falhou. Nova tentativa em 1 segundo...");        
       
       display.clearDisplay();
       display.setCursor(0, 0);
@@ -228,12 +232,89 @@ bool init_comunicacao_lora(void)
       delay(1000);
     } else {
       status_init = true;
+      LoRa.setSpreadingFactor(fatorE); /* Fator de Espalhamento */
       LoRa.setTxPower(HIGH_GAIN_LORA); /* Configura o ganho do receptor LoRa para 20dBm, o maior ganho possível (visando maior alcance possível) */ 
       LoRa.setSignalBandwidth(125E3);  /* Largura de banda fixa de 125 kHz *//* Suporta valores: 7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, 250E3 e 500E3 */
       LoRa.setCodingRate4(5);          /* Taxa de código - Suporta valores entre 5 e 8 */
     }
 
     return status_init;
+}
+
+/* Função: grava na NVS um dado do tipo interio 32-bits sem sinal, na chave definida em CHAVE_NVS */
+void grava_dado_nvs(uint32_t dado)
+{
+    nvs_handle handler_particao_nvs;
+    esp_err_t err;
+    
+    err = nvs_flash_init_partition("nvs");
+     
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao iniciar partição NVS.");           
+        return;
+    }
+ 
+    err = nvs_open_from_partition("nvs", "ns_nvs", NVS_READWRITE, &handler_particao_nvs);
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao abrir NVS como escrita/leitura"); 
+        return;
+    }
+ 
+    /* Atualiza valor do horimetro total */
+    err = nvs_set_u32(handler_particao_nvs, CHAVE_NVS, dado);
+ 
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Erro ao gravar horimetro");                   
+        nvs_close(handler_particao_nvs);
+        return;
+    }
+    else
+    {
+        Serial.println("Dado gravado com sucesso!");     
+        nvs_commit(handler_particao_nvs);    
+        nvs_close(handler_particao_nvs);      
+    }
+}
+
+/* Função: le da NVS um dado do tipo interio 32-bits sem sinal, contido na chave definida em CHAVE_NVS */
+uint32_t le_dado_nvs(void)
+{
+    nvs_handle handler_particao_nvs;
+    esp_err_t err;
+    uint32_t dado_lido;
+     
+    err = nvs_flash_init_partition("nvs");
+     
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao iniciar partição NVS.");         
+        return 0;
+    }
+ 
+    err = nvs_open_from_partition("nvs", "ns_nvs", NVS_READWRITE, &handler_particao_nvs);
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao abrir NVS como escrita/leitura");         
+        return 0;
+    }
+ 
+    /* Faz a leitura do dado associado a chave definida em CHAVE_NVS */
+    err = nvs_get_u32(handler_particao_nvs, CHAVE_NVS, &dado_lido);
+     
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao fazer leitura do dado");         
+        return 0;
+    }
+    else
+    {
+        Serial.println("Dado lido com sucesso!");  
+        nvs_close(handler_particao_nvs);   
+        return dado_lido;
+    }
 }
 
 void setup()
@@ -258,13 +339,23 @@ void setup()
     display.setTextSize(1);
   }
 
+  /* Leitura da memória flash que guarda o valor do Fator de Espalhamento */
+  uint32_t dado_lido = le_dado_nvs();
+
+  /* Lendo ou gravando o Fator de Espalhamento na memória flash do Esp32 */
+  if (dado_lido < 7 || 12 < dado_lido){
+    grava_dado_nvs(fatorE);
+  } else {
+    fatorE = dado_lido;
+  }
+
   while(init_comunicacao_lora() == false); /* Tenta, até obter sucesso na comunicacao com o chip LoRa */
 
   /* Iniciando Bluetooth BLE */
   StartBluetoothBle();
 
-  /* Pino de entrada do potenciômetro */
-  pinMode(pinoPOT, INPUT);
+  /* Pino de entrada do botão */
+  pinMode(pinoBotao, INPUT);
 
   /* Imprimir mensagem dizendo para esperar a chegada dos dados */
   aguardando_dados_display();
@@ -282,27 +373,23 @@ void loop()
   unsigned long idade;
   bool newData = false;
 
-  /* Executar depois de 200 milisegundos. Devido a uma oscilação causado pelo BLE */
-  if (millis() - tempoAntes > 200)
+  /* Executar a cada 20 milisegundos devido a uma oscilação do pino ao ligar o dispositivo */
+  if (millis() - tempoAntes > 20)
   {
-    /* Leitura da entrada do potenciômetro */
-    readPot = analogRead(pinoPOT);
+    if (digitalRead(pinoBotao) == LOW) {
+      fatorE = fatorE +1;
+      
+      if (fatorE < 7 || 12 < fatorE) {
+        fatorE = 7;
+      }
+      
+      grava_dado_nvs(fatorE);          /* Gravando o Fator de Espalhamento na memória flash do Esp32 */
+      LoRa.setSpreadingFactor(fatorE); /* Configurando o Fator de Espalhamento */
+      aguardando_dados_display();
+    }
     tempoAntes = millis();
   }
-
-  /* Mapeando o fator de espalhamento */
-  fatorE = map(readPot, 0, 4095, 7, 12);
   
-  /* Caso ocorra uma mudança de fator de espalhamento */
-  if (fatorE != fatorE_ant) {
-    aguardando_dados_display();
-  }
-  
-  fatorE_ant =  fatorE;
-
-  /* Fator de Espalhamento */
-  LoRa.setSpreadingFactor(fatorE);
-
   tam_pacote = LoRa.parsePacket(); /* Verifica se chegou alguma informação do tamanho esperado */
 
   if (tam_pacote == sizeof(TDadosLora)) {
