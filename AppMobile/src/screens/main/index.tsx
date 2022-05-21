@@ -41,7 +41,7 @@ const Main = () => {
     <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
       <Text style={{ fontSize: 20 }} >{ total >= 0 ? total : '' }</Text>
       <ButtonTopMenu texto='Total' tamanho='100px' onPress={() => quantidadeRegistros()} />
-      <ButtonTopMenu texto='Excluir todos' tamanho='150px' onPress={() => removeAll()} />
+      {/* <ButtonTopMenu texto='Excluir todos' tamanho='150px' onPress={() => removeAll()} /> */}
     </View>
   );
 };
