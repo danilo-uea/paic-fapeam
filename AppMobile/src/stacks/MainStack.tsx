@@ -36,6 +36,7 @@ const MainStack = () => {
     const [messageArray, setMessageArray] = useState<string[]>([]);
     const navigation = useNavigation<propsStack>();
     const [intervalId, setIntervalId] = useState<any>();
+    const [intervalIdBle, setIntervalIdBle] = useState<any>();
     const [ erro, setErro ] = useState<string>('');
 
     useEffect(() => {
@@ -78,7 +79,7 @@ const MainStack = () => {
     async function scanDevices() {
         BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
             if (error) {
-                console.log(error);
+                console.log('Erro ao scanear: ' + error);
                 setErro(error.message.toString())
             } else {
                 setErro('')
@@ -86,6 +87,9 @@ const MainStack = () => {
 
             if (scannedDevice && scannedDevice.name == 'ESP32') {
                 BLTManager.stopDeviceScan();
+                if (intervalIdBle) {
+                    clearInterval(intervalIdBle);
+                }
                 connectDevice(scannedDevice);
             }
         });
@@ -149,7 +153,7 @@ const MainStack = () => {
             clearInterval(intervalId);
         }
 
-        var Id = setInterval(() => {
+        let Id = setInterval(() => {
             cont++;
             let message = cont.toString() + ';2022-05-08 13:20:15;7;-75;21;-3.030872;-59.970642;-3.030444;-59.970444';
             setMessage(message)
@@ -174,10 +178,27 @@ const MainStack = () => {
         if (insistir) {
             if (!isConnected) {
                 scanDevices()
+
+                let id = setInterval(() => {
+                    console.log('Scaneando Ble')
+                    BLTManager.stopDeviceScan();
+                    scanDevices()
+                }, 10000)
+                setIntervalIdBle(id)
+
                 // conectarMock()
+            } else {
+                BLTManager.stopDeviceScan();
+                if (intervalIdBle) {
+                    clearInterval(intervalIdBle);
+                }
             }
         } else {
             BLTManager.stopDeviceScan();
+            if (intervalIdBle) {
+                clearInterval(intervalIdBle);
+            }
+            
             if (isConnected){
                 disconnectDevice()
                 // desconectarMock()
