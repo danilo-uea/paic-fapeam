@@ -363,6 +363,8 @@ void setup()
 }
 
 unsigned long tempoAntes = millis();
+unsigned long tempoRecepcao = millis();
+bool canRestart = false;
 
 void loop()
 { 
@@ -377,6 +379,7 @@ void loop()
   /* Executar a cada 20 milisegundos devido a uma oscilação do pino ao ligar o dispositivo */
   if (millis() - tempoAntes > 20)
   {
+    /* Mudando o fator de espalhamento */
     if (digitalRead(pinoBotao) == LOW) {
       fatorE = fatorE +1;
       
@@ -389,6 +392,14 @@ void loop()
       aguardando_dados_display();
     }
     tempoAntes = millis();
+
+    /* Verifica se é necessário reiniciar. Caso passe mais de 10 segundos sem receber dados */
+    if(millis() - tempoRecepcao > 20000) {
+      if (canRestart) {
+        Serial.println("Reiniciando ESP32");
+        ESP.restart();
+      }
+    }
   }
   
   tam_pacote = LoRa.parsePacket(); /* Verifica se chegou alguma informação do tamanho esperado */
@@ -406,5 +417,9 @@ void loop()
 
     envia_medicoes_serial(dados_lora, lora_rssi, tam_pacote);
     escreve_medicoes_display(dados_lora, lora_rssi);
+
+    /* Tratamento para reiniciar o dispositivo */
+    tempoRecepcao = millis();
+    canRestart = true;
   }
 }
