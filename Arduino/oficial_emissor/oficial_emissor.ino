@@ -7,6 +7,9 @@
 #include <LoRa.h>
 #include <SPI.h>
 
+/* Header-file com as funções utilizadas para manipulação da partição NVS */
+#include "nvs_flash.h"  
+
 /* Bibliotecas para o módulo de GPS */
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
@@ -27,14 +30,17 @@
 #define HIGH_GAIN_LORA     20  /* dBm */
 #define BAND               915E6  /* 915MHz de frequencia */
 
+/* Chave atribuida ao valor a ser escrito e lido da partição NVS */
+#define CHAVE_NVS  "fe"
+
 /* Pinagem para o módulo de GPS */
 const int RX_PIN = 22; /* Ligar no TX do GPS */
 const int TX_PIN = 23; /* Ligar no RX do GPS */
 const int BAUD_RATE = 9600;
 
 /* Pinagem para o botão do fator de espalhamento */
-int fatorE = 7;
-int botao =13;
+uint32_t fatorE = 7;
+int botao = 0;
 
 /* Variáveis globais para o módulo de GPS */
 TinyGPS gps;
@@ -130,7 +136,6 @@ void envia_medicoes_serial(TDadosLora dados_lora)
 
 void envia_informacoes_lora(TDadosLora dados_lora) 
 {
-  LoRa.setSpreadingFactor(fatorE);
   LoRa.beginPacket();
   LoRa.write((unsigned char *)&dados_lora, sizeof(TDadosLora));
   LoRa.endPacket();
@@ -180,6 +185,82 @@ bool init_comunicacao_lora(void)
     return status_init;
 }
 
+/* Função: grava na NVS um dado do tipo interio 32-bits sem sinal, na chave definida em CHAVE_NVS */
+void grava_dado_nvs(uint32_t dado)
+{
+    nvs_handle handler_particao_nvs;
+    esp_err_t err;
+    
+    err = nvs_flash_init_partition("nvs");
+     
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao iniciar partição NVS.");           
+        return;
+    }
+ 
+    err = nvs_open_from_partition("nvs", "ns_nvs", NVS_READWRITE, &handler_particao_nvs);
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao abrir NVS como escrita/leitura"); 
+        return;
+    }
+ 
+    /* Atualiza valor do horimetro total */
+    err = nvs_set_u32(handler_particao_nvs, CHAVE_NVS, dado);
+ 
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Erro ao gravar horimetro");                   
+        nvs_close(handler_particao_nvs);
+        return;
+    }
+    else
+    {
+        Serial.println("Dado gravado com sucesso!");     
+        nvs_commit(handler_particao_nvs);    
+        nvs_close(handler_particao_nvs);      
+    }
+}
+
+/* Função: le da NVS um dado do tipo interio 32-bits sem sinal, contido na chave definida em CHAVE_NVS */
+uint32_t le_dado_nvs(void)
+{
+    nvs_handle handler_particao_nvs;
+    esp_err_t err;
+    uint32_t dado_lido;
+     
+    err = nvs_flash_init_partition("nvs");
+     
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao iniciar partição NVS.");         
+        return 0;
+    }
+ 
+    err = nvs_open_from_partition("nvs", "ns_nvs", NVS_READWRITE, &handler_particao_nvs);
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao abrir NVS como escrita/leitura");         
+        return 0;
+    }
+ 
+    /* Faz a leitura do dado associado a chave definida em CHAVE_NVS */
+    err = nvs_get_u32(handler_particao_nvs, CHAVE_NVS, &dado_lido);
+     
+    if (err != ESP_OK)
+    {
+        Serial.println("[ERRO] Falha ao fazer leitura do dado");         
+        return 0;
+    }
+    else
+    {
+        Serial.println("Dado lido com sucesso!");  
+        nvs_close(handler_particao_nvs);   
+        return dado_lido;
+    }
+}
+
 void setup() 
 {
 /* Inicialização do módulo GPS */
@@ -209,7 +290,17 @@ void setup()
   display.setCursor(0,0);
   display.print("Emissor LoRa");
   display.display();
-  delay(2000); 
+  delay(2000);
+
+  /* Leitura da memória flash que guarda o valor do Fator de Espalhamento */
+  uint32_t dado_lido = le_dado_nvs();
+
+  /* Lendo ou gravando o Fator de Espalhamento na memória flash do Esp32 */
+  if (dado_lido < 7 || 12 < dado_lido){
+    grava_dado_nvs(fatorE);
+  } else {
+    fatorE = dado_lido;
+  }
 
   while(init_comunicacao_lora() == false); /* Tenta, até obter sucesso na comunicacao com o chip LoRa */
 
@@ -218,11 +309,12 @@ void setup()
   /* Imprimir mensagem dizendo que está aguardando o funcionamento do GPS */
   aguardando_dados_display();
 
-  /* Pino de entrada do potenciômetro */
+  /* Pino de entrada do botão */
   pinMode(botao, INPUT);
 }
 
 int cont = 0;
+unsigned long tempoAntes = millis();
 
 void loop()
 {
@@ -244,12 +336,21 @@ void loop()
     }
 
     /* Fator de Espalhamento */
-    if (digitalRead(botao) == HIGH){
-      fatorE = fatorE + 1;
-      if (fatorE > 12) {
-        fatorE = 7;
+    if (millis() - tempoAntes > 20)
+    {
+      if (digitalRead(botao) == LOW) /* Executar a cada 20 milisegundos devido a uma oscilação do pino ao ligar o dispositivo */
+      {
+        fatorE = fatorE + 1;
+        if (fatorE < 7 || 12 < fatorE) 
+        {
+          fatorE = 7;
+        }
+        grava_dado_nvs(fatorE);          /* Gravando o Fator de Espalhamento na memória flash do Esp32 */
+        LoRa.setSpreadingFactor(fatorE); /* Configurando o Fator de Espalhamento */
+        aguardando_dados_display();
       }
-      aguardando_dados_display();
+      
+      tempoAntes = millis();
     }
   }
 
@@ -267,6 +368,4 @@ void loop()
     
     cont++;
   }
-
-  //delay(1000);
 }
