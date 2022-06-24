@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import ButtonTopMenu from '../../components/ButtonTopMenu';
 import DadosEsp32 from '../../services/sqlite/DadosEsp32';
+import { useNavigation } from '@react-navigation/native';
+import { propsStack } from '../../stacks/models';
 
 const Main = () => {
+  const navigation = useNavigation<propsStack>()
   const [ total, setTotal ] = useState<number>(-1)
 
   const quantidadeRegistros = () => {
@@ -41,6 +44,7 @@ const Main = () => {
     <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
       <Text style={{ fontSize: 20 }} >{ total >= 0 ? total : '' }</Text>
       <ButtonTopMenu texto='Total' tamanho='100px' onPress={() => quantidadeRegistros()} />
+      <ButtonTopMenu texto='Posição fixa' tamanho='150px' onPress={() => navigation.navigate('FixPosition')} />
       {/* <ButtonTopMenu texto='Excluir todos' tamanho='150px' onPress={() => removeAll()} /> */}
     </View>
   );

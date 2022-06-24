@@ -10,6 +10,7 @@ export type propsNavigationStack = {
         dataInicial: string,
         dataFinal: string
     }
+    FixPosition?: { }
 }
 
 export type propsStack = NativeStackNavigationProp<propsNavigationStack>

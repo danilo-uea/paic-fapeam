@@ -22,6 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import { propsNavigationStack } from './models';
 import { propsStack } from './models';
 import ButtonTopMenu from '../components/ButtonTopMenu';
+import FixPosition from '../screens/fixPosition';
 
 const Stack = createNativeStackNavigator<propsNavigationStack>();
 
@@ -177,16 +178,16 @@ const MainStack = () => {
     useEffect(() => {
         if (insistir) {
             if (!isConnected) {
-                scanDevices()
+                // scanDevices()
 
-                let id = setInterval(() => {
-                    console.log('Scaneando Ble')
-                    BLTManager.stopDeviceScan();
-                    scanDevices()
-                }, 10000)
-                setIntervalIdBle(id)
+                // let id = setInterval(() => {
+                //     console.log('Scaneando Ble')
+                //     BLTManager.stopDeviceScan();
+                //     scanDevices()
+                // }, 10000)
+                // setIntervalIdBle(id)
 
-                // conectarMock()
+                conectarMock()
             } else {
                 BLTManager.stopDeviceScan();
                 if (intervalIdBle) {
@@ -200,8 +201,8 @@ const MainStack = () => {
             }
             
             if (isConnected){
-                disconnectDevice()
-                // desconectarMock()
+                // disconnectDevice()
+                desconectarMock()
             }
         }
     }, [insistir, isConnected])
@@ -271,6 +272,7 @@ const MainStack = () => {
                 <Stack.Screen name="Pagination" component={Pagination} />
                 <Stack.Screen name="Details" component={Details} />
                 <Stack.Screen name="Export" component={Export} />
+                <Stack.Screen name="FixPosition" component={FixPosition} />
             </Stack.Navigator>
         </>
     )
