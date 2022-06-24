@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, LogBox, Text, Alert } from 'react-native';
-import DadosEsp32 from '../services/sqlite/DadosEsp32';
+import DadosBluetooth from '../services/sqlite/DadosBluetooth';
 
 import base64 from 'react-native-base64';
 import BluetoothBle from '../../src/services/bluetooth';
@@ -46,7 +46,7 @@ const MainStack = () => {
     
     useEffect(() => {
         if (messageArray.length === 10 && armazenar) {
-            DadosEsp32.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8], messageArray[9])
+            DadosBluetooth.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8], messageArray[9])
                 .then((response: any) => {
                     console.log(response)
                     setErro('')
@@ -66,8 +66,8 @@ const MainStack = () => {
 
                 let data =
                     `${utcDate.getFullYear()}-` +                           //Ano
-                    `${DadosEsp32.zeroEsquerda(utcDate.getMonth() + 1)}-` + //Mês
-                    `${DadosEsp32.zeroEsquerda(utcDate.getDate())} ` +      //Dia
+                    `${DadosBluetooth.zeroEsquerda(utcDate.getMonth() + 1)}-` + //Mês
+                    `${DadosBluetooth.zeroEsquerda(utcDate.getDate())} ` +      //Dia
                     `${utcDate.toLocaleTimeString()}`;                      //Hora:minuto:segundo
                 
                 arrayOfStrings.push(data)

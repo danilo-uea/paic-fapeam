@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import ButtonTopMenu from '../../components/ButtonTopMenu';
-import DadosEsp32 from '../../services/sqlite/DadosEsp32';
+import DadosBluetooth from '../../services/sqlite/DadosBluetooth';
 import { useNavigation } from '@react-navigation/native';
 import { propsStack } from '../../stacks/models';
 
@@ -10,7 +10,7 @@ const Main = () => {
   const [ total, setTotal ] = useState<number>(-1)
 
   const quantidadeRegistros = () => {
-    DadosEsp32.countAll()
+    DadosBluetooth.countAll()
       .then((response:any) => {
         setTotal(parseInt(response))
         console.log('Qtd: ' + response)
@@ -22,7 +22,7 @@ const Main = () => {
   }
 
   const removerTodos = () => {
-    DadosEsp32.removeAll()
+    DadosBluetooth.removeAll()
       .then((response:any) => {
         Alert.alert('Messagem', response.toString())
         console.log(response)

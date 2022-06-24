@@ -4,9 +4,9 @@ db.transaction((tx) => {
     // tx.executeSql("DROP TABLE Bluetooth")
 
     tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS "
-        + "Bluetooth "
-        + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Contador INTEGER, SateliteDataHora DATETIME, Fe INTEGER, Rssi INTEGER, Tamanho INTEGER, LatitudeEmissor REAL, LongitudeEmissor REAL, LatitudeReceptor REAL, LongitudeReceptor REAL, DataHora DATETIME)"
+      "CREATE TABLE IF NOT EXISTS "
+      + "Bluetooth "
+      + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Contador INTEGER, SateliteDataHora DATETIME, Fe INTEGER, Rssi INTEGER, Tamanho INTEGER, LatitudeEmissor REAL, LongitudeEmissor REAL, LatitudeReceptor REAL, LongitudeReceptor REAL, DataHora DATETIME)"
     )
 })
 

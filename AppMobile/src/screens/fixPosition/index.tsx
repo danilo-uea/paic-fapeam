@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import ButtonTopMenu from '../../components/ButtonTopMenu';
 import InputName from "../../components/InputName"
-import DadosEsp32 from '../../services/sqlite/DadosEsp32';
+import DadosBluetooth from '../../services/sqlite/DadosBluetooth';
 import { useNavigation } from '@react-navigation/native';
 import { propsStack } from '../../stacks/models';
 

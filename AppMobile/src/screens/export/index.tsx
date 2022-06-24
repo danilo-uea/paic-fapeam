@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native'
 import { propsStack } from '../../stacks/models'
 import ButtonTopMenu from "../../components/ButtonTopMenu"
 import InputName from "../../components/InputName"
-import DadosEsp32 from "../../services/sqlite/DadosEsp32"
+import DadosBluetooth from "../../services/sqlite/DadosBluetooth"
 
 const Export = ({ route }: any) => {
     const [dataInicial] = useState<string>(route.params?.dataInicial)
@@ -80,7 +80,7 @@ const Export = ({ route }: any) => {
     const getStringToDate = async () => {
         var texto = ''
         
-        await DadosEsp32.listToExport(dataInicial, dataFinal)
+        await DadosBluetooth.listToExport(dataInicial, dataFinal)
             .then((response: any) => {
                 response?.forEach((element: any) => {
                     var linha = 

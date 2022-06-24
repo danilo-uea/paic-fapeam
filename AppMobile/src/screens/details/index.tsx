@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import ButtonTopMenu from '../../components/ButtonTopMenu';
-import DadosEsp32 from '../../services/sqlite/DadosEsp32';
+import DadosBluetooth from '../../services/sqlite/DadosBluetooth';
 import { useNavigation } from '@react-navigation/native';
 import { propsStack } from '../../stacks/models';
 
@@ -11,7 +11,7 @@ const Details = ({ route }: any) => {
     const navigation = useNavigation<propsStack>();
     
     useEffect(() => {
-        DadosEsp32.get(id)
+        DadosBluetooth.get(id)
         .then((response:any) => {
             setObj(response)
         }).catch(err => {

@@ -3,7 +3,7 @@ import { Alert, Platform, ScrollView, Text, View } from 'react-native';
 import DateTimeInput from '../../components/DateTimeInput';
 import { ViewHorizontal } from './styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import DadosEsp32 from '../../services/sqlite/DadosEsp32';
+import DadosBluetooth from '../../services/sqlite/DadosBluetooth';
 import ButtonTopMenu from '../../components/ButtonTopMenu';
 import { useNavigation } from '@react-navigation/native';
 import { propsStack } from '../../stacks/models';
@@ -37,8 +37,8 @@ const Pagination = () => {
         setDateStart(currentDate);
 
         let tempDate = new Date(currentDate);
-        let fDate = DadosEsp32.zeroEsquerda(tempDate.getDate()) + '/' + DadosEsp32.zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
-        let fTime = DadosEsp32.zeroEsquerda(tempDate.getHours()) + ':' + DadosEsp32.zeroEsquerda(tempDate.getMinutes());
+        let fDate = DadosBluetooth.zeroEsquerda(tempDate.getDate()) + '/' + DadosBluetooth.zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
+        let fTime = DadosBluetooth.zeroEsquerda(tempDate.getHours()) + ':' + DadosBluetooth.zeroEsquerda(tempDate.getMinutes());
 
         setDataInicialBr(fDate);
         setHoraInicialBr(fTime);
@@ -50,8 +50,8 @@ const Pagination = () => {
         setDateEnd(currentDate);
 
         let tempDate = new Date(currentDate);
-        let fDate = DadosEsp32.zeroEsquerda(tempDate.getDate()) + '/' + DadosEsp32.zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
-        let fTime = DadosEsp32.zeroEsquerda(tempDate.getHours()) + ':' + DadosEsp32.zeroEsquerda(tempDate.getMinutes());
+        let fDate = DadosBluetooth.zeroEsquerda(tempDate.getDate()) + '/' + DadosBluetooth.zeroEsquerda(tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
+        let fTime = DadosBluetooth.zeroEsquerda(tempDate.getHours()) + ':' + DadosBluetooth.zeroEsquerda(tempDate.getMinutes());
 
         setDataFinalBr(fDate);
         setHoraFinalBr(fTime);
@@ -68,10 +68,10 @@ const Pagination = () => {
     }
 
     const listDataHora = (DataInicial:Date, DataFinal:Date) => {
-        let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
-        let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
+        let dataInicial = DadosBluetooth.formatoDataFiltro(DataInicial);
+        let dataFinal = DadosBluetooth.formatoDataFiltro(DataFinal);
 
-        DadosEsp32.allDateTime(dataInicial, dataFinal)
+        DadosBluetooth.allDateTime(dataInicial, dataFinal)
             .then((response: any) => {
                 // response?.forEach((element: any) => {
                 //     console.log(element)
@@ -89,10 +89,10 @@ const Pagination = () => {
         Alert.alert('Perigo!', 'Deseja excluir todos os registros?', [
             {
                 text: 'Sim', onPress: () => {
-                    let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
-                    let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
+                    let dataInicial = DadosBluetooth.formatoDataFiltro(DataInicial);
+                    let dataFinal = DadosBluetooth.formatoDataFiltro(DataFinal);
 
-                    DadosEsp32.removeDateTime(dataInicial, dataFinal)
+                    DadosBluetooth.removeDateTime(dataInicial, dataFinal)
                         .then((response: any) => {
                             Alert.alert('Messagem', response.toString())
                             console.log(response)
@@ -108,8 +108,8 @@ const Pagination = () => {
     }
 
     const exportar = (DataInicial:Date, DataFinal:Date) => {
-        let dataInicial = DadosEsp32.formatoDataFiltro(DataInicial);
-        let dataFinal = DadosEsp32.formatoDataFiltro(DataFinal);
+        let dataInicial = DadosBluetooth.formatoDataFiltro(DataInicial);
+        let dataFinal = DadosBluetooth.formatoDataFiltro(DataFinal);
 
         navigation.navigate('Export', { dataInicial: dataInicial, dataFinal: dataFinal })
     }
