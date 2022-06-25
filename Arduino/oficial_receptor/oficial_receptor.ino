@@ -181,7 +181,7 @@ void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote)
   char mensagem[80];
   
   memset(mensagem,0,sizeof(mensagem));
-  sprintf(mensagem,"%d;%d-%02d-%02d %02d:%02d:%02d;%d;%d;%d;%.6f;%.6f;-3.030444;-59.970444", 
+  sprintf(mensagem,"%d;%d-%02d-%02d %02d:%02d:%02d;%d;%d;%d;%.6f;%.6f;0;0", 
     dados_lora.contador, 
     dados_lora.ano,
     dados_lora.mes,

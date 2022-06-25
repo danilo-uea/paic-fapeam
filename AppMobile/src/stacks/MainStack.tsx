@@ -23,6 +23,7 @@ import { propsNavigationStack } from './models';
 import { propsStack } from './models';
 import ButtonTopMenu from '../components/ButtonTopMenu';
 import FixPosition from '../screens/fixPosition';
+import DadosPosicaoFixa from '../services/sqlite/DadosPosicaoFixa';
 
 const Stack = createNativeStackNavigator<propsNavigationStack>();
 
@@ -38,12 +39,12 @@ const MainStack = () => {
     const navigation = useNavigation<propsStack>();
     const [intervalId, setIntervalId] = useState<any>();
     const [intervalIdBle, setIntervalIdBle] = useState<any>();
-    const [ erro, setErro ] = useState<string>('');
+    const [erro, setErro] = useState<string>('');
 
     useEffect(() => {
         splitString(message, ';')
     }, [message])
-    
+
     useEffect(() => {
         if (messageArray.length === 10 && armazenar) {
             DadosBluetooth.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8], messageArray[9])
@@ -69,10 +70,23 @@ const MainStack = () => {
                     `${DadosBluetooth.zeroEsquerda(utcDate.getMonth() + 1)}-` + //Mês
                     `${DadosBluetooth.zeroEsquerda(utcDate.getDate())} ` +      //Dia
                     `${utcDate.toLocaleTimeString()}`;                      //Hora:minuto:segundo
-                
+
                 arrayOfStrings.push(data)
 
-                setMessageArray(arrayOfStrings);
+                DadosPosicaoFixa.get()
+                    .then((response: any) => {
+                        if (response !== null) {
+                            arrayOfStrings[7] = response.latitudeReceptor?.toString()
+                            arrayOfStrings[8] = response.longitudeReceptor?.toString()
+                        }
+                        
+                        setMessageArray(arrayOfStrings);
+                        setErro('')
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        setErro(err.message.toString())
+                    })
             }
         }
     }
@@ -156,7 +170,7 @@ const MainStack = () => {
 
         let Id = setInterval(() => {
             cont++;
-            let message = cont.toString() + ';2022-05-08 13:20:15;7;-75;21;-3.030872;-59.970642;-3.030444;-59.970444';
+            let message = cont.toString() + ';2022-05-08 13:20:15;7;-75;21;-3.064472;-60.210918;0;0';
             setMessage(message)
         }, 1000);
 
@@ -199,8 +213,8 @@ const MainStack = () => {
             if (intervalIdBle) {
                 clearInterval(intervalIdBle);
             }
-            
-            if (isConnected){
+
+            if (isConnected) {
                 // disconnectDevice()
                 desconectarMock()
             }
@@ -249,18 +263,18 @@ const MainStack = () => {
                             <Text style={{ fontSize: 15 }}>Receptor Longitude: {messageArray[8]}</Text>
                             <Text style={{ fontSize: 15 }}>Data: {messageArray[9]}</Text>
                         </>
-                    ) : 
-                        <>
-                            { erro !== '' ?
-                                <>
-                                    <View style={{ alignItems: 'center', flexDirection: 'column' }}>
-                                        <Text style={{ color: 'red' }}>Erro</Text>
-                                    </View>
-                                    <Text style={{ color: 'red' }}>{erro}</Text>
-                                </>
-                            :   <></>
-                            }
-                        </>
+                    ) :
+                    <>
+                        {erro !== '' ?
+                            <>
+                                <View style={{ alignItems: 'center', flexDirection: 'column' }}>
+                                    <Text style={{ color: 'red' }}>Erro</Text>
+                                </View>
+                                <Text style={{ color: 'red' }}>{erro}</Text>
+                            </>
+                            : <></>
+                        }
+                    </>
                 }
             </View>
             <Stack.Navigator initialRouteName="Main"

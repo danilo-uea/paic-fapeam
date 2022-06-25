@@ -32,8 +32,6 @@ const FixPosition = () => {
             let latitudeNumber = parseFloat(latitude)
             let longitudeNumber = parseFloat(longitude)
 
-            console.log(latitudeNumber)
-
             if (isNaN(latitudeNumber) || isNaN(longitudeNumber)) {
                 Alert.alert('Messagem', 'Digite um formato válido')
             } else {
