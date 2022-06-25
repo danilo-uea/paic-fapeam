@@ -170,7 +170,7 @@ const Pagination = () => {
                                 key={element.id}
                                 onPress={() => navigation.navigate('Details', { id: element.id })}
                             >
-                                {element.contador} {element.fe} {element.dataHora}
+                                {element.contador} | {element.fe} | {element.dataHora} | {element.distancia}
                             </Text>
                         )
                     })

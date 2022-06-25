@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, LogBox, Text, Alert } from 'react-native';
 import DadosBluetooth from '../services/sqlite/DadosBluetooth';
+import Distancia from '../services/distancia/Distancia'
 
 import base64 from 'react-native-base64';
 import BluetoothBle from '../../src/services/bluetooth';
@@ -46,7 +47,7 @@ const MainStack = () => {
     }, [message])
 
     useEffect(() => {
-        if (messageArray.length === 10 && armazenar) {
+        if (messageArray.length === 11 && armazenar) {
             DadosBluetooth.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8], messageArray[9])
                 .then((response: any) => {
                     console.log(response)
@@ -79,6 +80,15 @@ const MainStack = () => {
                             arrayOfStrings[7] = response.latitudeReceptor?.toString()
                             arrayOfStrings[8] = response.longitudeReceptor?.toString()
                         }
+
+                        let distancia = Distancia.calculo(
+                            parseFloat(arrayOfStrings[5]),
+                            parseFloat(arrayOfStrings[6]),
+                            parseFloat(arrayOfStrings[7]),
+                            parseFloat(arrayOfStrings[8])
+                        )
+
+                        arrayOfStrings.push(distancia)
                         
                         setMessageArray(arrayOfStrings);
                         setErro('')
@@ -249,7 +259,7 @@ const MainStack = () => {
                 </ViewHorizontal>
             </View>
             <View style={{ marginRight: 8, marginLeft: 8, marginBottom: 5 }}>
-                {isConnected && messageArray.length === 10 && erro === '' ?
+                {isConnected && messageArray.length === 11 && erro === '' ?
                     (
                         <>
                             <Text style={{ fontSize: 15 }}>Contador: {messageArray[0]}</Text>
@@ -262,6 +272,7 @@ const MainStack = () => {
                             <Text style={{ fontSize: 15 }}>Receptor Latitude: {messageArray[7]}</Text>
                             <Text style={{ fontSize: 15 }}>Receptor Longitude: {messageArray[8]}</Text>
                             <Text style={{ fontSize: 15 }}>Data: {messageArray[9]}</Text>
+                            <Text style={{ fontSize: 15 }}>Distância: {messageArray[10]}</Text>
                         </>
                     ) :
                     <>

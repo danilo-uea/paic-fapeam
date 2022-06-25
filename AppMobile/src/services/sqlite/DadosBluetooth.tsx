@@ -1,3 +1,4 @@
+import Distancia from '../distancia/Distancia';
 import db from './SQLiteDatabase';
 
 db.transaction((tx) => {
@@ -58,7 +59,7 @@ const allDateTime = (dataInicial:string, dataFinal:string) => {
   return new Promise(async (resolve, reject) => {
     try {
       let query = 
-        "SELECT ID, Contador, DataHora, Fe " + 
+        "SELECT ID, Contador, DataHora, Fe, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor " + 
         "FROM Bluetooth " + 
         "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " + 
         "AND strftime('%Y-%m-%d %H:%M:%S', DataHora) <= strftime('%Y-%m-%d %H:%M:%S', ?)";
@@ -73,11 +74,20 @@ const allDateTime = (dataInicial:string, dataFinal:string) => {
             if (len > 0) {  
               for (let i = 0; i < len; i++) {
                 let item = results.rows.item(i);
+
+                let dist = Distancia.calculo(
+                  item.LatitudeEmissor, 
+                  item.LongitudeEmissor, 
+                  item.LatitudeReceptor, 
+                  item.LongitudeReceptor
+                )
+                
                 list.push({ 
                   id: item.ID, 
                   contador: item.Contador, 
                   dataHora: item.DataHora, 
                   fe: item.Fe,
+                  distancia: dist
                   // rssi: item.Rssi,
                   // tamanho: item.Tamanho,
                   // latitude: item.Latitude,
@@ -150,6 +160,13 @@ const get = (Id:number) => {
           (tx, results) => {
             let len = results.rows.length;
             if (len > 0) {
+              let dist = Distancia.calculo(
+                results.rows.item(0).LatitudeEmissor, 
+                results.rows.item(0).LongitudeEmissor, 
+                results.rows.item(0).LatitudeReceptor, 
+                results.rows.item(0).LongitudeReceptor
+              )
+
               resolve({ 
                 id: results.rows.item(0).ID, 
                 contador: results.rows.item(0).Contador, 
@@ -161,7 +178,8 @@ const get = (Id:number) => {
                 longitudeEmissor: results.rows.item(0).LongitudeEmissor,
                 latitudeReceptor: results.rows.item(0).LatitudeReceptor,
                 longitudeReceptor: results.rows.item(0).LongitudeReceptor,
-                dataHora: results.rows.item(0).DataHora })
+                dataHora: results.rows.item(0).DataHora,
+                distancia: dist })
             } else {
               resolve(null)
             }
