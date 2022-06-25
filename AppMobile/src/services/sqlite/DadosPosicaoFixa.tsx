@@ -10,7 +10,7 @@ db.transaction((tx) => {
     )
 })
 
-const update = (LatitudeReceptor:string, LongitudeReceptor:string) => {
+const update = (LatitudeReceptor:number, LongitudeReceptor:number) => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.transaction(async (tx) => {
@@ -18,7 +18,7 @@ const update = (LatitudeReceptor:string, LongitudeReceptor:string) => {
           "UPDATE PosicaoFixa SET LatitudeReceptor = ?, LongitudeReceptor = ? WHERE ID = 1", 
           [LatitudeReceptor, LongitudeReceptor],
           (tx, results) => {
-            resolve('Inserido com sucesso: ' + results.insertId)
+            resolve('Posição atualizada com sucesso')
           },
           error => { reject(error) }
         )
@@ -29,7 +29,7 @@ const update = (LatitudeReceptor:string, LongitudeReceptor:string) => {
   })
 }
 
-const insert = (LatitudeReceptor:string, LongitudeReceptor:string) => {
+const insert = (LatitudeReceptor:number, LongitudeReceptor:number) => {
     return new Promise(async (resolve, reject) => {
       try {
         await db.transaction(async (tx) => {
@@ -37,7 +37,7 @@ const insert = (LatitudeReceptor:string, LongitudeReceptor:string) => {
             "INSERT INTO PosicaoFixa (LatitudeReceptor, LongitudeReceptor) VALUES (?,?)", 
             [LatitudeReceptor, LongitudeReceptor],
             (tx, results) => {
-              resolve('Inserido com sucesso: ' + results.insertId)
+              resolve('Posição inserida com sucesso')
             },
             error => { reject(error) }
           )
