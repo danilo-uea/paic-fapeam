@@ -34,6 +34,8 @@ const Details = ({ route }: any) => {
                     <Text>Emissor Longitude: {obj.longitudeEmissor}</Text>
                     <Text>Receptor Latitude: {obj.latitudeReceptor}</Text>
                     <Text>Receptor Longitude: {obj.longitudeReceptor}</Text>
+                    <Text>Temperatura: {obj.temperatura} °C</Text>
+                    <Text>Umidade: {obj.umidade}%</Text>
                     <Text>Data Hora: {obj.dataHora}</Text>
                     <Text>Distância: {obj.distancia}</Text>
                 </View>

@@ -14,6 +14,9 @@
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
 
+/* Bibliotecas para o sensor DHT */
+#include <DHT.h>
+
 /* Pinagem para o Display Oled */
 #define OLED_SDA 4
 #define OLED_SCL 15 
@@ -33,6 +36,10 @@
 /* Chave atribuida ao valor a ser escrito e lido da partição NVS */
 #define CHAVE_NVS  "fe"
 
+/* Pinagem para o sensor DHT */
+#define DHTPIN 13      /* (GPIO 13) */
+#define DHTTYPE DHT22   /* DHT11, DHT21, DHT22 */
+
 /* Pinagem para o módulo de GPS */
 const int RX_PIN = 22; /* Ligar no TX do GPS */
 const int TX_PIN = 23; /* Ligar no RX do GPS */
@@ -41,6 +48,9 @@ const int BAUD_RATE = 9600;
 /* Pinagem para o botão do fator de espalhamento */
 uint32_t fatorE = 7;
 int botao = 0;
+
+/* Objeto para comunicação com sensor DHT */
+DHT dht(DHTPIN, DHTTYPE); 
 
 /* Variáveis globais para o módulo de GPS */
 TinyGPS gps;
@@ -60,6 +70,8 @@ typedef struct __attribute__((__packed__))
   int ano;
   float f_latitude;
   float f_longitude;
+  float temperatura;
+  float umidade;
 } TDadosLora;
 
 void aguardando_dados_display();
@@ -99,12 +111,20 @@ void escreve_medicoes_display(TDadosLora dados_lora)
     sprintf(str_flon, "%.6f", dados_lora.f_longitude);
     
     display.setCursor(0, 20);
-    display.print("Lat: ");
+    display.print("Lat.: ");
     display.println(str_flat);
 
     display.setCursor(0, 30);
-    display.print("Lon: ");
+    display.print("Lon.: ");
     display.println(str_flon);
+
+    display.setCursor(0, 40);
+    display.print("Temp.: ");
+    display.println(dados_lora.temperatura);
+
+    display.setCursor(0, 50);
+    display.print("Umid.: ");
+    display.println(dados_lora.umidade);
     
     display.display();
 }
@@ -129,6 +149,14 @@ void envia_medicoes_serial(TDadosLora dados_lora)
 
   memset(mensagem,0,sizeof(mensagem));
   sprintf(mensagem,"Lon: %.6f", dados_lora.f_longitude);
+  Serial.println(mensagem);
+
+  memset(mensagem,0,sizeof(mensagem));
+  sprintf(mensagem,"Temperatura: %.2f", dados_lora.temperatura);
+  Serial.println(mensagem);
+
+  memset(mensagem,0,sizeof(mensagem));
+  sprintf(mensagem,"Umidade: %.2f", dados_lora.umidade);
   Serial.println(mensagem);
   
   Serial.println(" ");
@@ -309,8 +337,11 @@ void setup()
   /* Imprimir mensagem dizendo que está aguardando o funcionamento do GPS */
   aguardando_dados_display();
 
-  /* Pino de entrada do botão */
+  /* Pino de entrada do botão de mudança do fator de espalhamento*/
   pinMode(botao, INPUT);
+
+  /* Iniciando o sensor DHT */
+  dht.begin();
 }
 
 int cont = 0;
@@ -322,6 +353,8 @@ void loop()
   dados_lora.contador = cont;
   unsigned long idade;
   bool newData = false;
+  float temperatura_lida = 0;
+  float umidade_lida = 0;
        
   /* Realiza a leitura do módulo GPS */
   for (unsigned long start = millis(); millis() - start < 1000;)
@@ -362,6 +395,9 @@ void loop()
     byte centesimo;
     gps.crack_datetime(&dados_lora.ano, &dados_lora.mes, &dados_lora.dia, &dados_lora.hora, &dados_lora.minuto, &dados_lora.segundo, &centesimo, &idade);
 
+    dados_lora.temperatura = dht.readTemperature(); /* Faz a leitura de temperatura do sensor */
+    dados_lora.umidade = dht.readHumidity();        /* Faz a leitura de umidade do sensor */
+    
     envia_medicoes_serial(dados_lora);
     escreve_medicoes_display(dados_lora);
     envia_informacoes_lora(dados_lora);

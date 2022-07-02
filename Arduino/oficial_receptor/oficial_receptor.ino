@@ -73,6 +73,8 @@ typedef struct __attribute__((__packed__))
   int ano;
   float f_latitude;
   float f_longitude;
+  float temperatura;
+  float umidade;
 } TDadosLora;
 
 void StartBluetoothBle();
@@ -150,7 +152,14 @@ void escreve_medicoes_display(TDadosLora dados_lora, int lora_rssi)
 
   display.setCursor(0, 10);
   display.print("F.E.: ");
-  display.println(fatorE);
+  display.print(fatorE);
+
+  /* Conexão Bluetooth BLE */
+  if (deviceConnected){
+    display.println(" (Ble on)");
+  } else {
+    display.println(" (Ble off)");
+  }
   
   display.setCursor(0, 20);
   display.print("RSSI: ");
@@ -164,15 +173,12 @@ void escreve_medicoes_display(TDadosLora dados_lora, int lora_rssi)
   display.print("Lon: ");
   display.println(str_flon);
 
-  /* Conexão Bluetooth BLE */
-  if (deviceConnected){
-    display.setCursor(0, 50);
-    display.println("Ble enviando");
-  } else {
-    display.setCursor(0, 50);
-    display.println("Ble sem conexao");
-  }
-  
+  display.setCursor(0, 50);
+  display.print("Tem: ");
+  display.print(dados_lora.temperatura);
+  display.print(" Umi: ");
+  display.println(dados_lora.umidade);
+
   display.display();
 }
 
@@ -181,7 +187,7 @@ void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote)
   char mensagem[80];
   
   memset(mensagem,0,sizeof(mensagem));
-  sprintf(mensagem,"%d;%d-%02d-%02d %02d:%02d:%02d;%d;%d;%d;%.6f;%.6f;0;0", 
+  sprintf(mensagem,"%d;%d-%02d-%02d %02d:%02d:%02d;%d;%d;%d;%.6f;%.6f;0;0;%.2f;%.2f", 
     dados_lora.contador, 
     dados_lora.ano,
     dados_lora.mes,
@@ -193,7 +199,9 @@ void envia_medicoes_serial(TDadosLora dados_lora, int lora_rssi, int tam_pacote)
     lora_rssi, 
     tam_pacote, 
     dados_lora.f_latitude, 
-    dados_lora.f_longitude);
+    dados_lora.f_longitude,
+    dados_lora.temperatura,
+    dados_lora.umidade);
 
   Serial.print(mensagem);
 

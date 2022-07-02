@@ -93,6 +93,8 @@ const Export = ({ route }: any) => {
                     `${element.longitudeEmissor};` +
                     `${element.latitudeReceptor};` +
                     `${element.longitudeReceptor};` +
+                    `${element.temperatura};` +
+                    `${element.umidade};` +
                     `${element.dataHora}\n`
 
                     texto += linha

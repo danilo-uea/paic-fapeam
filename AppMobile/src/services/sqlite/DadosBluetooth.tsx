@@ -2,22 +2,22 @@ import Distancia from '../distancia/Distancia';
 import db from './SQLiteDatabase';
 
 db.transaction((tx) => {
-    // tx.executeSql("DROP TABLE Bluetooth")
+  // tx.executeSql("DROP TABLE Bluetooth")
 
-    tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS "
-      + "Bluetooth "
-      + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Contador INTEGER, SateliteDataHora DATETIME, Fe INTEGER, Rssi INTEGER, Tamanho INTEGER, LatitudeEmissor REAL, LongitudeEmissor REAL, LatitudeReceptor REAL, LongitudeReceptor REAL, DataHora DATETIME)"
-    )
+  tx.executeSql(
+    "CREATE TABLE IF NOT EXISTS "
+    + "Bluetooth "
+    + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Contador INTEGER, SateliteDataHora DATETIME, Fe INTEGER, Rssi INTEGER, Tamanho INTEGER, LatitudeEmissor REAL, LongitudeEmissor REAL, LatitudeReceptor REAL, LongitudeReceptor REAL, Temperatura REAL, Umidade REAL, DataHora DATETIME)"
+  )
 })
 
-const create = (Contador:string, SateliteDataHora:string, Fe:string, Rssi:string, Tamanho:string, LatitudeEmissor:string, LongitudeEmissor:string, LatitudeReceptor:string, LongitudeReceptor:string, DataHora:string) => {
+const create = (Contador: string, SateliteDataHora: string, Fe: string, Rssi: string, Tamanho: string, LatitudeEmissor: string, LongitudeEmissor: string, LatitudeReceptor: string, LongitudeReceptor: string, Temperatura: string, Umidade: string, DataHora: string) => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
-          "INSERT INTO Bluetooth (Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, DataHora) VALUES (?,?,?,?,?,?,?,?,?,?)", 
-          [Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, DataHora],
+          "INSERT INTO Bluetooth (Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, Temperatura, Umidade, DataHora) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+          [Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, Temperatura, Umidade, DataHora],
           (tx, results) => {
             resolve('Inserido com sucesso: ' + results.insertId)
           },
@@ -39,7 +39,7 @@ const countAll = () => {
           (tx, results) => {
             let len = results.rows.length;
 
-            if (len > 0) {  
+            if (len > 0) {
               let item = results.rows.item(0).Qtd;
               resolve(item)
             } else {
@@ -55,13 +55,13 @@ const countAll = () => {
   })
 }
 
-const allDateTime = (dataInicial:string, dataFinal:string) => {
+const allDateTime = (dataInicial: string, dataFinal: string) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let query = 
-        "SELECT ID, Contador, DataHora, Fe, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor " + 
-        "FROM Bluetooth " + 
-        "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " + 
+      let query =
+        "SELECT ID, Contador, DataHora, Fe, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor " +
+        "FROM Bluetooth " +
+        "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " +
         "AND strftime('%Y-%m-%d %H:%M:%S', DataHora) <= strftime('%Y-%m-%d %H:%M:%S', ?)";
 
       await db.transaction(async (tx) => {
@@ -70,22 +70,22 @@ const allDateTime = (dataInicial:string, dataFinal:string) => {
           (tx, results) => {
             let list = [];
             let len = results.rows.length;
-            
-            if (len > 0) {  
+
+            if (len > 0) {
               for (let i = 0; i < len; i++) {
                 let item = results.rows.item(i);
 
                 let dist = Distancia.calculo(
-                  item.LatitudeEmissor, 
-                  item.LongitudeEmissor, 
-                  item.LatitudeReceptor, 
+                  item.LatitudeEmissor,
+                  item.LongitudeEmissor,
+                  item.LatitudeReceptor,
                   item.LongitudeReceptor
                 )
-                
-                list.push({ 
-                  id: item.ID, 
-                  contador: item.Contador, 
-                  dataHora: item.DataHora, 
+
+                list.push({
+                  id: item.ID,
+                  contador: item.Contador,
+                  dataHora: item.DataHora,
                   fe: item.Fe,
                   distancia: dist
                   // rssi: item.Rssi,
@@ -106,13 +106,13 @@ const allDateTime = (dataInicial:string, dataFinal:string) => {
   })
 }
 
-const listToExport = (dataInicial:string, dataFinal:string) => {
+const listToExport = (dataInicial: string, dataFinal: string) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let query = 
-        "SELECT ID, Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, DataHora " + 
-        "FROM Bluetooth " + 
-        "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " + 
+      let query =
+        "SELECT ID, Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, Temperatura, Umidade, DataHora " +
+        "FROM Bluetooth " +
+        "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " +
         "AND strftime('%Y-%m-%d %H:%M:%S', DataHora) <= strftime('%Y-%m-%d %H:%M:%S', ?)";
 
       await db.transaction(async (tx) => {
@@ -121,13 +121,13 @@ const listToExport = (dataInicial:string, dataFinal:string) => {
           (tx, results) => {
             let list = [];
             let len = results.rows.length;
-            
-            if (len > 0) {  
+
+            if (len > 0) {
               for (let i = 0; i < len; i++) {
                 let item = results.rows.item(i);
-                list.push({ 
-                  id: item.ID, 
-                  contador: item.Contador, 
+                list.push({
+                  id: item.ID,
+                  contador: item.Contador,
                   sateliteDataHora: item.SateliteDataHora,
                   fe: item.Fe,
                   rssi: item.Rssi,
@@ -136,6 +136,8 @@ const listToExport = (dataInicial:string, dataFinal:string) => {
                   longitudeEmissor: item.LongitudeEmissor,
                   latitudeReceptor: item.LatitudeReceptor,
                   longitudeReceptor: item.LongitudeReceptor,
+                  temperatura: item.Temperatura,
+                  umidade: item.Umidade,
                   dataHora: item.DataHora
                 })
               }
@@ -151,35 +153,38 @@ const listToExport = (dataInicial:string, dataFinal:string) => {
   })
 }
 
-const get = (Id:number) => {
+const get = (Id: number) => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
-          "SELECT ID, Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, DataHora FROM Bluetooth WHERE ID = ?", [Id],
+          "SELECT ID, Contador, SateliteDataHora, Fe, Rssi, Tamanho, LatitudeEmissor, LongitudeEmissor, LatitudeReceptor, LongitudeReceptor, Temperatura, Umidade, DataHora FROM Bluetooth WHERE ID = ?", [Id],
           (tx, results) => {
             let len = results.rows.length;
             if (len > 0) {
               let dist = Distancia.calculo(
-                results.rows.item(0).LatitudeEmissor, 
-                results.rows.item(0).LongitudeEmissor, 
-                results.rows.item(0).LatitudeReceptor, 
+                results.rows.item(0).LatitudeEmissor,
+                results.rows.item(0).LongitudeEmissor,
+                results.rows.item(0).LatitudeReceptor,
                 results.rows.item(0).LongitudeReceptor
               )
 
-              resolve({ 
-                id: results.rows.item(0).ID, 
-                contador: results.rows.item(0).Contador, 
-                sateliteDataHora: results.rows.item(0).SateliteDataHora, 
-                fe: results.rows.item(0).Fe, 
-                rssi: results.rows.item(0).Rssi, 
-                tamanho: results.rows.item(0).Tamanho, 
-                latitudeEmissor: results.rows.item(0).LatitudeEmissor, 
+              resolve({
+                id: results.rows.item(0).ID,
+                contador: results.rows.item(0).Contador,
+                sateliteDataHora: results.rows.item(0).SateliteDataHora,
+                fe: results.rows.item(0).Fe,
+                rssi: results.rows.item(0).Rssi,
+                tamanho: results.rows.item(0).Tamanho,
+                latitudeEmissor: results.rows.item(0).LatitudeEmissor,
                 longitudeEmissor: results.rows.item(0).LongitudeEmissor,
                 latitudeReceptor: results.rows.item(0).LatitudeReceptor,
                 longitudeReceptor: results.rows.item(0).LongitudeReceptor,
                 dataHora: results.rows.item(0).DataHora,
-                distancia: dist })
+                temperatura: results.rows.item(0).Temperatura,
+                umidade: results.rows.item(0).Umidade,
+                distancia: dist
+              })
             } else {
               resolve(null)
             }
@@ -193,13 +198,13 @@ const get = (Id:number) => {
   })
 }
 
-const removeId = (Id:number) => {
+const removeId = (Id: number) => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.transaction(async (tx) => {
         await tx.executeSql(
           "DELETE FROM Bluetooth WHERE ID = ?", [Id],
-          () => { resolve('Excluído com sucesso')},
+          () => { resolve('Excluído com sucesso') },
           error => { reject(error) }
         )
       })
@@ -215,7 +220,7 @@ const removeAll = () => {
       await db.transaction(async (tx) => {
         await tx.executeSql(
           "DELETE FROM Bluetooth", [],
-          () => { resolve('Todos foram excluídos')},
+          () => { resolve('Todos foram excluídos') },
           error => { reject(error) }
         )
       })
@@ -225,18 +230,18 @@ const removeAll = () => {
   })
 }
 
-const removeDateTime = (dataInicial:string, dataFinal:string) => {
+const removeDateTime = (dataInicial: string, dataFinal: string) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let query = 
-        "DELETE " + 
-        "FROM Bluetooth " + 
-        "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " + 
+      let query =
+        "DELETE " +
+        "FROM Bluetooth " +
+        "WHERE strftime('%Y-%m-%d %H:%M:%S', DataHora) >= strftime('%Y-%m-%d %H:%M:%S', ?) " +
         "AND strftime('%Y-%m-%d %H:%M:%S', DataHora) <= strftime('%Y-%m-%d %H:%M:%S', ?)";
       await db.transaction(async (tx) => {
         await tx.executeSql(
           query, [dataInicial, dataFinal],
-          () => { resolve('Excluídos com sucesso')},
+          () => { resolve('Excluídos com sucesso') },
           error => { reject(error) }
         )
       })

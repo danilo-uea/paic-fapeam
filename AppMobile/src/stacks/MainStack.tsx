@@ -46,9 +46,9 @@ const MainStack = () => {
         splitString(message, ';')
     }, [message])
 
-    useEffect(() => {
-        if (messageArray.length === 11 && armazenar) {
-            DadosBluetooth.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8], messageArray[9])
+    useEffect(() => {        
+        if (messageArray.length === 13 && armazenar) {
+            DadosBluetooth.create(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4], messageArray[5], messageArray[6], messageArray[7], messageArray[8], messageArray[9], messageArray[10], messageArray[11])
                 .then((response: any) => {
                     console.log(response)
                     setErro('')
@@ -63,7 +63,7 @@ const MainStack = () => {
     const splitString = (stringToSplit: string, separator: string) => {
         if (message !== '') {
             let arrayOfStrings = stringToSplit.split(separator);
-            if (arrayOfStrings.length === 9) {
+            if (arrayOfStrings.length === 11) {
                 let utcDate = new Date();
 
                 let data =
@@ -89,7 +89,7 @@ const MainStack = () => {
                         )
 
                         arrayOfStrings.push(distancia)
-                        
+
                         setMessageArray(arrayOfStrings);
                         setErro('')
                     })
@@ -180,7 +180,7 @@ const MainStack = () => {
 
         let Id = setInterval(() => {
             cont++;
-            let message = cont.toString() + ';2022-05-08 13:20:15;7;-75;21;-3.064472;-60.210918;0;0';
+            let message = cont.toString() + ';2022-05-08 13:20:15;7;-75;21;-3.064472;-60.210918;0;0;28.8;45.9';
             setMessage(message)
         }, 1000);
 
@@ -199,19 +199,22 @@ const MainStack = () => {
         setIsConnected(false);
     }
 
+    const conectarDispositivo = () => {
+        scanDevices()
+
+        let id = setInterval(() => {
+            console.log('Scaneando Ble')
+            BLTManager.stopDeviceScan();
+            scanDevices()
+        }, 10000)
+        setIntervalIdBle(id)
+    }
+
     useEffect(() => {
         if (insistir) {
             if (!isConnected) {
-                // scanDevices()
-
-                // let id = setInterval(() => {
-                //     console.log('Scaneando Ble')
-                //     BLTManager.stopDeviceScan();
-                //     scanDevices()
-                // }, 10000)
-                // setIntervalIdBle(id)
-
-                conectarMock()
+                conectarDispositivo()
+                // conectarMock()
             } else {
                 BLTManager.stopDeviceScan();
                 if (intervalIdBle) {
@@ -225,8 +228,8 @@ const MainStack = () => {
             }
 
             if (isConnected) {
-                // disconnectDevice()
-                desconectarMock()
+                disconnectDevice()
+                // desconectarMock()
             }
         }
     }, [insistir, isConnected])
@@ -259,7 +262,7 @@ const MainStack = () => {
                 </ViewHorizontal>
             </View>
             <View style={{ marginRight: 8, marginLeft: 8, marginBottom: 5 }}>
-                {isConnected && messageArray.length === 11 && erro === '' ?
+                {isConnected && messageArray.length === 13 && erro === '' ?
                     (
                         <>
                             <Text style={{ fontSize: 15 }}>Contador: {messageArray[0]}</Text>
@@ -271,8 +274,10 @@ const MainStack = () => {
                             <Text style={{ fontSize: 15 }}>Emissor Longitude: {messageArray[6]}</Text>
                             <Text style={{ fontSize: 15 }}>Receptor Latitude: {messageArray[7]}</Text>
                             <Text style={{ fontSize: 15 }}>Receptor Longitude: {messageArray[8]}</Text>
-                            <Text style={{ fontSize: 15 }}>Data: {messageArray[9]}</Text>
-                            <Text style={{ fontSize: 15 }}>Distância: {messageArray[10]}</Text>
+                            <Text style={{ fontSize: 15 }}>Temperatura: {messageArray[9]} °C</Text>
+                            <Text style={{ fontSize: 15 }}>Umidade: {messageArray[10]}%</Text>
+                            <Text style={{ fontSize: 15 }}>Data: {messageArray[11]}</Text>
+                            <Text style={{ fontSize: 15 }}>Distância: {messageArray[12]}</Text>
                         </>
                     ) :
                     <>
