@@ -1,0 +1,14 @@
+Para compilar:
+    gcc paho.c -o paho -lpaho-mqtt3c -Wall
+
+Para instalar:
+    apt update
+    apt upgrade
+    apt install libssl-dev
+    apt install doxygen
+    cd ~
+    git clone https://github.com/eclipse/paho.mqtt.c.git
+    cd paho.mqtt.c
+    make
+    make html
+    sudo make install
