@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
+#include <cstring>
 #include <MQTTClient.h>
 
 #define ADDRESS     "broker.hivemq.com:1883"
@@ -8,10 +7,6 @@
 #define TOPIC       "uea/danilo/valor"
 #define QOS         1
 #define TIMEOUT     10000L
-
-void delivered(void *context, MQTTClient_deliveryToken dt) {
-    printf("Message with token value %d delivery confirmed\n", dt);
-}
 
 int main(int argc, char* argv[]) {
     MQTTClient client;
@@ -25,11 +20,12 @@ int main(int argc, char* argv[]) {
     conn_opts.cleansession = 1;
 
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
-        printf("Failed to connect, return code %d\n", rc);
-        exit(-1);
+        std::cout << "Failed to connect, return code " << rc << std::endl;
+        return 1;
     }
+    std::cout << "Connected to server '" << ADDRESS << "'" << std::endl;
 
-    char* payload = "Hello, world!";
+    char* payload = (char*)"Hello, world!";
     int payloadlen = strlen(payload);
 
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
@@ -38,9 +34,9 @@ int main(int argc, char* argv[]) {
     pubmsg.qos = QOS;
     pubmsg.retained = 0;
     MQTTClient_publishMessage(client, TOPIC, &pubmsg, &token);
-    printf("Waiting for publication of message with token value %d\n", token);
+    std::cout << "Waiting for publication of message with token value " << token << std::endl;
     MQTTClient_waitForCompletion(client, token, TIMEOUT);
-    printf("Message with token value %d delivered\n", token);
+    std::cout << "Message with token value " << token << " delivered" << std::endl;
 
     MQTTClient_disconnect(client, 10000);
     MQTTClient_destroy(&client);

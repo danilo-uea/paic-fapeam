@@ -1,0 +1,18 @@
+Para compilar e executar em C:
+    gcc paho.c -o paho -lpaho-mqtt3c -Wall
+    ./paho
+Para compilar e executar em C++:
+    g++ paho.cpp -o paho -lpaho-mqtt3c -Wall
+    ./paho
+Para instalar:
+    Linguagem C e C++:
+        apt install build-essential
+    paho-mqtt:
+        apt install libssl-dev
+        apt install doxygen
+        cd ~
+        git clone https://github.com/eclipse/paho.mqtt.c.git
+        cd paho.mqtt.c
+        make
+        make html
+        sudo make install
