@@ -1,0 +1,70 @@
+CBFCursos
+
+Sistema Operacional:
+    Login: lora, Senha: lora
+VNC conta:
+    Login: danilo.sparrow@gmail.com, Senha: 12345678
+VNC Acesso:
+    Senha: 123456789
+
+#2 - Principais comandos
+
+-Visualizar caminho do diretório: pwd
+-Listar conteúdo:
+    ls -R (com sub-diretórios)
+    ls -a (arquivos ocultos)
+    ls -al (mais detalhes)
+    tree (formato de árvore)
+    tree -d (sem formato de árvore)
+-Editor de arquivos: nano <nome_arquivo.extensão>
+-Diretórios:
+    -Criar: mkdir <nome>
+    -Remover: rmdir <nome>
+-Arquivos:
+    -Exibir conteúdo: cat <nome>
+    -Copiar: cp <caminho_origem> <caminho_destino>
+    -Mover: mv <caminho_origem> <caminho_destino>
+    -Trocar nome: mv <nome_antivo> <nome_novo>
+    -Remover: rm <nome>
+    -Pesquisar ou procurar: sudo find / -name <nome>
+        -Nome incompleto: sudo find / -name <nome*>
+
+-Mostra a estrutura de pinagem: pinout
+-Mostra o IP: ifconfig
+-Trocar configurações: sudo raspi-config
+-Reiniciar: sudo reboot
+-Desligar: 
+    sudo halt
+    sudo shutdown now (desligar agora)
+    sudo shutdown -r 100 (desligar daqui a 100 segundos)
+-Encontrar um programa instalado: whereis <nome>
+    Ex: whereis putty
+
+------------------------------------------------------------------
+#3 - Gerenciamento de pacotes
+
+-Listar comandos: apt
+-Executar antes de instalar qualquer programa: sudo apt update
+-Limpar uma lista de pacotes: sudo apt clean
+
+------------------------------------------------------------------
+#4 - Acesso Remoto via SSH
+
+-Habilitar o SSH via desktop
+-Instalar o openssh-server: sudo apt install openssh-server
+-Verificar se o servidor SSH está rodando: sudo service ssh
+    -Também imprime uma lista de comandos para uso
+-Abrir o Putty
+
+------------------------------------------------------------------
+#5 - Acendendo um Led no Raspberry Pi com Node-Red 
+
+Node-Red:
+    -Instalar no Raspberry Pi (https://nodered.org/docs/getting-started/raspberrypi)
+        sudo apt install build-essential git curl
+        bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
+    -Executar
+        -Execução comum: node-red
+        -Liberar memória não utilizada (opcional): node-red-pi --max-old-space-size=256
+    -Acessar no Raspberry Pi: localhost:1880
+    -Acessar em outro PC: 192.168.15.8:1880

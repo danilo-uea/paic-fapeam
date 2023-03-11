@@ -19,6 +19,13 @@
 #include <time.h>
 #include <errno.h>
 #include <sys/file.h>
+#include <MQTTClient.h>
+
+#define ADDRESS     "broker.hivemq.com:1883"
+#define CLIENTID    "id_faERTAgvES"
+#define TOPIC       "uea/danilo/valor"
+#define QOS         1
+#define TIMEOUT     10000L
 
 /* SUPORTE
  * Para requerer servico de suporte e/ou implementacao, entre em contato com a AFEletronica <afeletronicavendas@gmail.com> ou Do bit Ao Byte <djames.suhanko@gmail.com>.
@@ -35,17 +42,17 @@
 // Estrutura que vai receber os dados do transmissor via LoRa
 typedef struct
 {
-  int contador;
-  int hora;
-  int minuto;
-  int segundo;
-  int dia;
-  int mes;
-  int ano;
-  float f_latitude;
-  float f_longitude;
-  float temperatura;
-  float umidade;
+    int contador;
+    int hora;
+    int minuto;
+    int segundo;
+    int dia;
+    int mes;
+    int ano;
+    float f_latitude;
+    float f_longitude;
+    float temperatura;
+    float umidade;
 } TDadosLora ;
 
 //screen -d -m -S shared e screen -x
@@ -384,7 +391,7 @@ void sig_handler(int sig)
 
 /*! Funcao principal. Todo o programa e executado dentro dessa funcao. A primeira tarefa e validar o usuário; se
 nao for root, sai imediatamente. Executar como root e mandatorio devido a acessos privilegiados do BCM.*/
-int main (int argc, char *argv[] ){    
+int main (int argc, char *argv[] ){
     isAlreadyRunning();
 
     //Informacoes sobre a tabela da base de exemplo ficticia
@@ -534,8 +541,6 @@ int main (int argc, char *argv[] ){
     clearClients();
 
 	_state = LoraServerState::INIT_CONSOLE;
-
-
     
     struct stat st;
     
@@ -551,28 +556,28 @@ int main (int argc, char *argv[] ){
         return 1;
     }
 
-#ifdef RF_RST_PIN
-  //printf( ", RST=GPIO%d", RF_RST_PIN );
-  // Pulse a reset on module
-  pinMode(RF_RST_PIN, OUTPUT);
-  digitalWrite(RF_RST_PIN, LOW );
-  bcm2835_delay(150);
-  digitalWrite(RF_RST_PIN, HIGH );
-  bcm2835_delay(100);
-#endif
+    #ifdef RF_RST_PIN
+        //printf( ", RST=GPIO%d", RF_RST_PIN );
+        // Pulse a reset on module
+        pinMode(RF_RST_PIN, OUTPUT);
+        digitalWrite(RF_RST_PIN, LOW );
+        bcm2835_delay(150);
+        digitalWrite(RF_RST_PIN, HIGH );
+        bcm2835_delay(100);
+    #endif
 
-  for (int i=0;i<number_of_radios_to_initialize;i++){
-      if (!rf95[i].init()) {
-            string m = "(radio " + to_string(i) + " ERROR!!!)";
-          debug(m + "\n");
-          log(m);
-          fprintf( stderr, "\033[1;31m::: RF95 module init failed. Please, check the board :::\033[0m\n\n" );
-      }
-      else{
-          string msg =  "\033[32mRadio " +  to_string(i) + " started. Setting up...\033[0m\n" ;
-          debug(msg);
-      }
-  }
+    for (int i=0;i<number_of_radios_to_initialize;i++){
+        if (!rf95[i].init()) {
+                string m = "(radio " + to_string(i) + " ERROR!!!)";
+            debug(m + "\n");
+            log(m);
+            fprintf( stderr, "\033[1;31m::: RF95 module init failed. Please, check the board :::\033[0m\n\n" );
+        }
+        else{
+            string msg =  "\033[32mRadio " +  to_string(i) + " started. Setting up...\033[0m\n" ;
+            debug(msg);
+        }
+    }
 
 
     // Adjust Frequency
@@ -589,46 +594,81 @@ int main (int argc, char *argv[] ){
 
     debug("\n\nWaiting message!\n\n");
 
-    //SE PRECISAR FAZER DEBUG APENAS NO PRIMEIRO RADIO,
-    //BASTA COMENTAR O OPERADOR TERNARIO NO FINAL DO LOOP
-    
+    //Configurações do protocolo MQTT
+    MQTTClient client;
+    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+    MQTTClient_message pubmsg = MQTTClient_message_initializer;
+    MQTTClient_deliveryToken token;
+    int rc;
+
+    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.cleansession = 1;
+
+    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
+        debug("Falha ao conectar, código de retorno: " + to_string(rc) + "\n");
+        return 1;
+    }
+
+    debug("Conectado ao servidor " + to_string(ADDRESS) + "\n");
+    /* FIM MQTT */
+
     TDadosLora dados_lora;
     char * ptInformaraoRecebida = NULL;
     
     while (!force_exit) {
         if (rf95[radioNumber].available()) {
-          // Should be a message for us now
-          uint8_t buf[MESSAGE_LENGTH];
-          uint8_t len   = sizeof(buf);
+            // Should be a message for us now
+            uint8_t buf[MESSAGE_LENGTH];
+            uint8_t len   = sizeof(buf);
 
-          _lastMessageMillis = getMillis();
-          ptInformaraoRecebida = (char *)&dados_lora;
-          
-          if (rf95[radioNumber].recv(buf, &len)) {
-              for (int i=0;i<MESSAGE_LENGTH;i++){
-                  *ptInformaraoRecebida = buf[i];
-                  ptInformaraoRecebida++;
-              }
-              debug("Tamanho: " + to_string(sizeof(dados_lora)) + "\n");
-              debug("Contador: " + to_string(dados_lora.contador) + "\n");
-              debug("Hora: " + to_string(dados_lora.hora) + "\n");
-              debug("Minuto: " + to_string(dados_lora.minuto) + "\n");
-              debug("Segundo: " + to_string(dados_lora.segundo) + "\n");
-              debug("Dia: " + to_string(dados_lora.dia) + "\n");
-              debug("Mes: " + to_string(dados_lora.mes) + "\n");
-              debug("Ano: " + to_string(dados_lora.ano) + "\n");
-              debug("Latitude: " + to_string(dados_lora.f_latitude) + "\n");
-              debug("Longitude: " + to_string(dados_lora.f_longitude) + "\n");
-              debug("Temperatura: " + to_string(dados_lora.temperatura) + "\n");
-              debug("Umidade: " + to_string(dados_lora.umidade) + "\n\n");
-          }
-          else {
-              debug("Erro ao receber mensagem :(\n");
-              log("Erro na recepcao de mensagem");
-          }
+            _lastMessageMillis = getMillis();
+            ptInformaraoRecebida = (char *)&dados_lora;
+            
+            if (rf95[radioNumber].recv(buf, &len)) {
+                for (int i=0;i<MESSAGE_LENGTH;i++){
+                    *ptInformaraoRecebida = buf[i];
+                    ptInformaraoRecebida++;
+                }
+                
+                const char* payload = reinterpret_cast<const char*>(&dados_lora);
+
+                // Criando a mensagem a ser publicada
+                pubmsg.payload = const_cast<char*>(payload);
+                pubmsg.payloadlen = sizeof(dados_lora);
+                pubmsg.qos = QOS;
+                pubmsg.retained = 0;
+
+                // Publicando a mensagem
+                if ((rc = MQTTClient_publishMessage(client, TOPIC, &pubmsg, &token)) != MQTTCLIENT_SUCCESS) {
+                    debug("Falha ao publicar a mensagem, código de retorno: " + to_string(rc) + "\n");
+                    return 1;
+                }
+                
+                // Esperando a entrega da mensagem
+                MQTTClient_waitForCompletion(client, token, TIMEOUT);
+                debug("Mensagem entregue...\n");
+
+                debug("Tamanho: " + to_string(sizeof(dados_lora)) + "\n");
+                debug("Contador: " + to_string(dados_lora.contador) + "\n");
+                debug("Hora: " + to_string(dados_lora.hora) + "\n");
+                debug("Minuto: " + to_string(dados_lora.minuto) + "\n");
+                debug("Segundo: " + to_string(dados_lora.segundo) + "\n");
+                debug("Dia: " + to_string(dados_lora.dia) + "\n");
+                debug("Mes: " + to_string(dados_lora.mes) + "\n");
+                debug("Ano: " + to_string(dados_lora.ano) + "\n");
+                debug("Latitude: " + to_string(dados_lora.f_latitude) + "\n");
+                debug("Longitude: " + to_string(dados_lora.f_longitude) + "\n");
+                debug("Temperatura: " + to_string(dados_lora.temperatura) + "\n");
+                debug("Umidade: " + to_string(dados_lora.umidade) + "\n\n");
+            }
+            else {
+                debug("Erro ao receber mensagem :(\n");
+                log("Erro na recepcao de mensagem");
+            }
 
         }
-
 
         /*
          * Se nao for definido no arquivo ini um ou mais rádios para envio de firmware, essa condicional nao e executada nunca. Definicao:
@@ -651,7 +691,11 @@ int main (int argc, char *argv[] ){
 
     }//while (!force_exit)
 
-  printf( "\n%s Ending\n", __BASEFILE__ );
-  bcm2835_close();
-  return 0;
+    MQTTClient_disconnect(client, 10000);
+    MQTTClient_destroy(&client);
+    debug("MQTT desconectado!\n");
+
+    printf( "\n%s Ending\n", __BASEFILE__ );
+    bcm2835_close();
+    return 0;
 }

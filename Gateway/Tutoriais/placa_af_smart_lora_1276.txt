@@ -1,0 +1,20 @@
+Placa AF Smart LoRa 1276
+    hostname: multiRadio
+    Usuario 1: configurar, senha: afeletronica
+    Usuario 2: pi, senha: afeletronica
+
+    -Objetos e executáveis do programa principal:
+        -Entrar no diretório AFMultiRadio
+        -Limpa todo o diretório: make clean
+        -Gerar o binário do programa: 
+            make
+            make install
+                -Copiar para o diretório do sistema e já vai reiniciar o sistema para subir o serviço com o novo binário
+        -O programa deve ser rodado como root: sudo su
+        -Executar o programa manualmente: 
+            ./multiRadio
+            ./multiRadio -v[com modo verboso (opcional)]
+        -Help do programa : ./multiRadio -h
+        -Iniciar o serviço: service AFMultiRadio start
+            -Já é iniciado automaticamente
+        -Pegar o status: service AFMultiRadio status

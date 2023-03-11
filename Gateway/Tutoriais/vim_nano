@@ -1,0 +1,34 @@
+Vim
+    Importante
+        "ggVG" - Selecionar tudo
+        "y" - Copiar texto selecionado
+        "yy" - Para copiar texto da linha onde está o cursor
+        "dd" - Para recortar texto da linha onde está o cursor
+        "p" - Para colar o texto copiado no local onde está o cursor
+
+    Básico
+        ":q" - sair do Vim, a menos que haja alterações não salvas no arquivo, neste caso, o Vim exibirá uma mensagem de erro.
+        ":q!" - sair do Vim sem salvar as alterações feitas no arquivo.
+        ":wq" - salvar as alterações feitas no arquivo e sair do Vim.
+        ":x" ou "ZZ" - salvar as alterações feitas no arquivo e sair do Vim.
+        "i" - entrar no modo de inserção, onde você pode digitar e editar o texto.
+        "Esc" - sair do modo de inserção e voltar ao modo de comando.
+        ":w" - salvar as alterações feitas no arquivo.
+        ":w nome_do_arquivo" - salvar as alterações feitas no arquivo com um novo nome.
+        ":q" - sair do Vim.
+        ":q!" - sair do Vim sem salvar as alterações feitas no arquivo.
+        "dd" - excluir a linha atual.
+        "yy" - copiar a linha atual.
+        "p" - colar a linha copiada ou excluída.
+
+Nano
+    -Retornar para o nano:
+        jobs
+        fg <numero>
+    -Copiar do nano: alt + 6
+    -Colar via SSH: botão direito do mouse
+    -Colar para o nano: ctrl + u
+
+
+
+

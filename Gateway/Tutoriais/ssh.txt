@@ -1,0 +1,25 @@
+SSH
+
+Copiar do host remoto para o host local (Windows 10):
+    scp <login>@<host>:/caminho/do/arquivo/nome_arquivo.ext C:\caminho\do\arquivo\
+    Exemplos:
+        scp pi@multiRadio:/home/pi/RadioHead/examples/raspi/rf95/rf95_server.cpp D:\Documentos\GitHub\paic-fapeam\Gateway\official_receptor_gateway_lora\
+        scp pi@multiRadio:/home/pi/RadioHead/examples/raspi/rf95/Makefile D:\Documentos\GitHub\paic-fapeam\Gateway\official_receptor_gateway_lora\
+Copiar do host local para o host remoto (Windows 10):
+    scp C:\caminho\do\arquivo\nome_arquivo.ext <login>@<host>:/caminho/do/arquivo/
+    Exemplos:
+        scp D:\Documentos\GitHub\paic-fapeam\Gateway\official_receptor_gateway_lora\rf95_server.cpp pi@multiRadio:/home/pi/RadioHead/examples/raspi/rf95/
+        scp D:\Documentos\GitHub\paic-fapeam\Gateway\official_receptor_gateway_lora\Makefile pi@multiRadio:/home/pi/RadioHead/examples/raspi/rf95/
+
+------------------------------------------------------------------
+Execultar um programa gráfico via SSH
+
+Acessar 'codelite' externamente via Putty
+    -Instalar Putty e Xlaunch (pois ele vem com o Xming)
+    -Verificar se Putty e Xming estão abrindo via terminal: 
+        -Comandos: putty, xming
+        -Se não abrir adicioná-los à variável de ambiente e abrir novamente
+    -Execultar comandos
+        xming -ac -clipboard -multiwindow
+        putty -ssh -X pi@multiRadio
+    -Execultar programa desejado. Ex: codelite
