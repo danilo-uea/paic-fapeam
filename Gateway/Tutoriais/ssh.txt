@@ -1,11 +1,14 @@
 SSH
 
-Copiar do host remoto para o host local (Windows 10):
+-Acessar: 
+    ssh pi@multiRadio
+    ssh configurar@multiRadio
+-Copiar do host remoto para o host local (Windows 10):
     scp <login>@<host>:/caminho/do/arquivo/nome_arquivo.ext C:\caminho\do\arquivo\
     Exemplos:
         scp pi@multiRadio:/home/pi/RadioHead/examples/raspi/rf95/rf95_server.cpp D:\Documentos\GitHub\paic-fapeam\Gateway\official_receptor_gateway_lora\
         scp pi@multiRadio:/home/pi/RadioHead/examples/raspi/rf95/Makefile D:\Documentos\GitHub\paic-fapeam\Gateway\official_receptor_gateway_lora\
-Copiar do host local para o host remoto (Windows 10):
+-Copiar do host local para o host remoto (Windows 10):
     scp C:\caminho\do\arquivo\nome_arquivo.ext <login>@<host>:/caminho/do/arquivo/
     Exemplos:
         scp D:\Documentos\GitHub\paic-fapeam\Gateway\official_receptor_gateway_lora\rf95_server.cpp pi@multiRadio:/home/pi/RadioHead/examples/raspi/rf95/

@@ -3,6 +3,10 @@ Placa AF Smart LoRa 1276
     Usuario 1: configurar, senha: afeletronica
     Usuario 2: pi, senha: afeletronica
 
+    Acessar pelo terminal: 
+        -ssh pi@multiRadio
+        -ssh configurar@multiRadio
+
     -Objetos e executáveis do programa principal:
         -Entrar no diretório AFMultiRadio
         -Limpa todo o diretório: make clean
@@ -18,3 +22,8 @@ Placa AF Smart LoRa 1276
         -Iniciar o serviço: service AFMultiRadio start
             -Já é iniciado automaticamente
         -Pegar o status: service AFMultiRadio status
+    
+    -Erro de espaço (No space left on device)
+        -Verifique o espaço livre disponível: df -h
+        -Verifique o tamanho dos arquivos e diretórios: du -sh
+        -Entrar em algum S.O linux, usar o programa GParted para redimensionar a partição.
