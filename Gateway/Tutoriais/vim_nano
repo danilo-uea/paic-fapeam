@@ -5,6 +5,7 @@ Vim
         "yy" - Para copiar texto da linha onde está o cursor
         "dd" - Para recortar texto da linha onde está o cursor
         "p" - Para colar o texto copiado no local onde está o cursor
+        "<numero_linha>gg" - Navegar para uma linha específica
 
     Básico
         ":q" - sair do Vim, a menos que haja alterações não salvas no arquivo, neste caso, o Vim exibirá uma mensagem de erro.

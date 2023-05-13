@@ -24,7 +24,7 @@
 #define ADDRESS     "broker.hivemq.com:1883"
 #define CLIENTID    "id_faERTAgvES"
 #define TOPIC       "uea/danilo/valor"
-#define QOS         1
+#define QOS         0
 #define TIMEOUT     10000L
 
 /* SUPORTE
@@ -54,6 +54,23 @@ typedef struct
     float temperatura;
     float umidade;
 } TDadosLora ;
+
+typedef struct
+{
+    int contador;
+    int hora;
+    int minuto;
+    int segundo;
+    int dia;
+    int mes;
+    int ano;
+    float f_latitude;
+    float f_longitude;
+    float temperatura;
+    float umidade;
+    int tamanho;
+    int rssi;
+} TDadosMqtt ;
 
 //screen -d -m -S shared e screen -x
 #define LAST_UPDATE "20.01.2020 15:16"
@@ -556,29 +573,28 @@ int main (int argc, char *argv[] ){
         return 1;
     }
 
-    #ifdef RF_RST_PIN
-        //printf( ", RST=GPIO%d", RF_RST_PIN );
-        // Pulse a reset on module
-        pinMode(RF_RST_PIN, OUTPUT);
-        digitalWrite(RF_RST_PIN, LOW );
-        bcm2835_delay(150);
-        digitalWrite(RF_RST_PIN, HIGH );
-        bcm2835_delay(100);
-    #endif
+#ifdef RF_RST_PIN
+  //printf( ", RST=GPIO%d", RF_RST_PIN );
+  // Pulse a reset on module
+  pinMode(RF_RST_PIN, OUTPUT);
+  digitalWrite(RF_RST_PIN, LOW );
+  bcm2835_delay(150);
+  digitalWrite(RF_RST_PIN, HIGH );
+  bcm2835_delay(100);
+#endif
 
-    for (int i=0;i<number_of_radios_to_initialize;i++){
-        if (!rf95[i].init()) {
-                string m = "(radio " + to_string(i) + " ERROR!!!)";
-            debug(m + "\n");
-            log(m);
-            fprintf( stderr, "\033[1;31m::: RF95 module init failed. Please, check the board :::\033[0m\n\n" );
-        }
-        else{
-            string msg =  "\033[32mRadio " +  to_string(i) + " started. Setting up...\033[0m\n" ;
-            debug(msg);
-        }
-    }
-
+  for (int i=0;i<number_of_radios_to_initialize;i++){
+      if (!rf95[i].init()) {
+            string m = "(radio " + to_string(i) + " ERROR!!!)";
+          debug(m + "\n");
+          log(m);
+          fprintf( stderr, "\033[1;31m::: RF95 module init failed. Please, check the board :::\033[0m\n\n" );
+      }
+      else{
+          string msg =  "\033[32mRadio " +  to_string(i) + " started. Setting up...\033[0m\n" ;
+          debug(msg);
+      }
+  }
 
     // Adjust Frequency
     for (int i=0;i<number_of_radios_to_initialize;i++){
@@ -590,6 +606,14 @@ int main (int argc, char *argv[] ){
         rf95[i].setFrequency(frequencies[i]);
         rf95[i].setPromiscuous(true);
         rf95[i].setModeRx();
+        // rf95[i].setModemConfig(RH_RF95::Bw125Cr45Sf128);  //7
+        // rf95[i].setModemConfig(RH_RF95::Bw125Cr45Sf256);  //8
+        // rf95[i].setModemConfig(RH_RF95::Bw125Cr45Sf512);  //9
+        // rf95[i].setModemConfig(RH_RF95::Bw125Cr45Sf1024); //10
+        // rf95[i].setModemConfig(RH_RF95::Bw125Cr45Sf2048); //11
+        // rf95[i].setModemConfig(RH_RF95::SF12); //12
+        // rf95[i].setModemRegisters(RH_RF95::setSpreadingFactor(12));
+
     }
 
     debug("\n\nWaiting message!\n\n");
@@ -609,14 +633,16 @@ int main (int argc, char *argv[] ){
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
         debug("Falha ao conectar, código de retorno: " + to_string(rc) + "\n");
         return 1;
+    } else {
+        debug("Conectado ao servidor MQTT\n");
     }
 
-    debug("Conectado ao servidor " + to_string(ADDRESS) + "\n");
     /* FIM MQTT */
 
     TDadosLora dados_lora;
+    TDadosMqtt dados_mqtt;
     char * ptInformaraoRecebida = NULL;
-    
+
     while (!force_exit) {
         if (rf95[radioNumber].available()) {
             // Should be a message for us now
@@ -625,18 +651,38 @@ int main (int argc, char *argv[] ){
 
             _lastMessageMillis = getMillis();
             ptInformaraoRecebida = (char *)&dados_lora;
+
+            // uint8_t from  = rf95[radioNumber].headerFrom();
+            // uint8_t to    = rf95[radioNumber].headerTo();
+            // uint8_t id    = rf95[radioNumber].headerId();
+            // uint8_t flags = rf95[radioNumber].headerFlags();
+            int8_t rssi   = rf95[radioNumber].lastRssi();
             
             if (rf95[radioNumber].recv(buf, &len)) {
                 for (int i=0;i<MESSAGE_LENGTH;i++){
                     *ptInformaraoRecebida = buf[i];
                     ptInformaraoRecebida++;
                 }
-                
-                const char* payload = reinterpret_cast<const char*>(&dados_lora);
+
+                dados_mqtt.contador = dados_lora.contador;
+                dados_mqtt.hora = dados_lora.hora;
+                dados_mqtt.minuto = dados_lora.minuto;
+                dados_mqtt.segundo = dados_lora.segundo;
+                dados_mqtt.dia = dados_lora.dia;
+                dados_mqtt.mes = dados_lora.mes;
+                dados_mqtt.ano = dados_lora.ano;
+                dados_mqtt.f_latitude = dados_lora.f_latitude;
+                dados_mqtt.f_longitude = dados_lora.f_longitude;
+                dados_mqtt.temperatura = dados_lora.temperatura;
+                dados_mqtt.umidade = dados_lora.umidade;
+                dados_mqtt.tamanho = sizeof(dados_mqtt);
+                dados_mqtt.rssi = rssi;
+
+                const char* payload = reinterpret_cast<const char*>(&dados_mqtt);
 
                 // Criando a mensagem a ser publicada
                 pubmsg.payload = const_cast<char*>(payload);
-                pubmsg.payloadlen = sizeof(dados_lora);
+                pubmsg.payloadlen = sizeof(dados_mqtt);
                 pubmsg.qos = QOS;
                 pubmsg.retained = 0;
 
@@ -650,24 +696,24 @@ int main (int argc, char *argv[] ){
                 MQTTClient_waitForCompletion(client, token, TIMEOUT);
                 debug("Mensagem entregue...\n");
 
-                debug("Tamanho: " + to_string(sizeof(dados_lora)) + "\n");
-                debug("Contador: " + to_string(dados_lora.contador) + "\n");
-                debug("Hora: " + to_string(dados_lora.hora) + "\n");
-                debug("Minuto: " + to_string(dados_lora.minuto) + "\n");
-                debug("Segundo: " + to_string(dados_lora.segundo) + "\n");
-                debug("Dia: " + to_string(dados_lora.dia) + "\n");
-                debug("Mes: " + to_string(dados_lora.mes) + "\n");
-                debug("Ano: " + to_string(dados_lora.ano) + "\n");
-                debug("Latitude: " + to_string(dados_lora.f_latitude) + "\n");
-                debug("Longitude: " + to_string(dados_lora.f_longitude) + "\n");
-                debug("Temperatura: " + to_string(dados_lora.temperatura) + "\n");
-                debug("Umidade: " + to_string(dados_lora.umidade) + "\n\n");
+                debug("Contador: " + to_string(dados_mqtt.contador) + "\n");
+                debug("Hora: " + to_string(dados_mqtt.hora) + "\n");
+                debug("Minuto: " + to_string(dados_mqtt.minuto) + "\n");
+                debug("Segundo: " + to_string(dados_mqtt.segundo) + "\n");
+                debug("Dia: " + to_string(dados_mqtt.dia) + "\n");
+                debug("Mes: " + to_string(dados_mqtt.mes) + "\n");
+                debug("Ano: " + to_string(dados_mqtt.ano) + "\n");
+                debug("Latitude: " + to_string(dados_mqtt.f_latitude) + "\n");
+                debug("Longitude: " + to_string(dados_mqtt.f_longitude) + "\n");
+                debug("Temperatura: " + to_string(dados_mqtt.temperatura) + "\n");
+                debug("Umidade: " + to_string(dados_mqtt.umidade) + "\n");
+                debug("Tamanho: " + to_string(sizeof(dados_mqtt)) + "\n");
+                debug("RSSI " + to_string(rssi) + "\n\n");
             }
             else {
                 debug("Erro ao receber mensagem :(\n");
                 log("Erro na recepcao de mensagem");
             }
-
         }
 
         /*
@@ -687,7 +733,7 @@ int main (int argc, char *argv[] ){
         bcm2835_delay(5);
 
         //COMENTE ESSA LINHA PARA USAR APENAS O RADIO 0
-        //radioNumber = radioNumber > number_of_radios_to_initialize-2 ? 0 : radioNumber+1;
+        // radioNumber = radioNumber > number_of_radios_to_initialize-2 ? 0 : radioNumber+1;
 
     }//while (!force_exit)
 

@@ -83,7 +83,9 @@ bool init_comunicacao_lora(void)
     else
     {
         /* Configura o ganho do receptor LoRa para 20dBm, o maior ganho possível (visando maior alcance possível) */ 
-        LoRa.setTxPower(HIGH_GAIN_LORA); 
+        LoRa.setTxPower(HIGH_GAIN_LORA);
+        /* Configura o fator de espalhamento */ 
+        // LoRa.setSpreadingFactor(12);
         Serial.println("[LoRa Sender] Comunicacao com o radio LoRa ok");
         status_init = true;
     }
