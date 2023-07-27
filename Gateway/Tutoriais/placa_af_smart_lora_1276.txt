@@ -27,3 +27,10 @@ Placa AF Smart LoRa 1276
         -Verifique o espaço livre disponível: df -h
         -Verifique o tamanho dos arquivos e diretórios: du -sh
         -Entrar em algum S.O linux, usar o programa GParted para redimensionar a partição.
+
+    -Parar o processo (multiRadio -v):
+        -Encontar o PIP do processo: ps aux
+        -Parar o processo: kill -9 [PID]
+
+    Como fazer para habilitar o ambiente virtual:
+        c:\Envs\mqtt_python\Scripts\activate.bat

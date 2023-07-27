@@ -624,11 +624,10 @@ int main (int argc, char *argv[] ){
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
     MQTTClient_deliveryToken token;
     int rc;
-
-    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession = 1;
+
+    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
         debug("Falha ao conectar, código de retorno: " + to_string(rc) + "\n");
@@ -689,26 +688,34 @@ int main (int argc, char *argv[] ){
                 // Publicando a mensagem
                 if ((rc = MQTTClient_publishMessage(client, TOPIC, &pubmsg, &token)) != MQTTCLIENT_SUCCESS) {
                     debug("Falha ao publicar a mensagem, código de retorno: " + to_string(rc) + "\n");
-                    return 1;
-                }
-                
-                // Esperando a entrega da mensagem
-                MQTTClient_waitForCompletion(client, token, TIMEOUT);
-                debug("Mensagem entregue...\n");
+                    
+                    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
-                debug("Contador: " + to_string(dados_mqtt.contador) + "\n");
-                debug("Hora: " + to_string(dados_mqtt.hora) + "\n");
-                debug("Minuto: " + to_string(dados_mqtt.minuto) + "\n");
-                debug("Segundo: " + to_string(dados_mqtt.segundo) + "\n");
-                debug("Dia: " + to_string(dados_mqtt.dia) + "\n");
-                debug("Mes: " + to_string(dados_mqtt.mes) + "\n");
-                debug("Ano: " + to_string(dados_mqtt.ano) + "\n");
-                debug("Latitude: " + to_string(dados_mqtt.f_latitude) + "\n");
-                debug("Longitude: " + to_string(dados_mqtt.f_longitude) + "\n");
-                debug("Temperatura: " + to_string(dados_mqtt.temperatura) + "\n");
-                debug("Umidade: " + to_string(dados_mqtt.umidade) + "\n");
-                debug("Tamanho: " + to_string(sizeof(dados_mqtt)) + "\n");
-                debug("RSSI " + to_string(rssi) + "\n\n");
+                    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
+                        debug("Falha ao conectar, código de retorno: " + to_string(rc) + "\n");
+                        return 1;
+                    } else {
+                        debug("Conectado ao servidor MQTT\n");
+                    }
+                } else {
+                    // Esperando a entrega da mensagem
+                    MQTTClient_waitForCompletion(client, token, TIMEOUT);
+                    debug("Mensagem entregue...\n");
+
+                    debug("Contador: " + to_string(dados_mqtt.contador) + "\n");
+                    debug("Hora: " + to_string(dados_mqtt.hora) + "\n");
+                    debug("Minuto: " + to_string(dados_mqtt.minuto) + "\n");
+                    debug("Segundo: " + to_string(dados_mqtt.segundo) + "\n");
+                    debug("Dia: " + to_string(dados_mqtt.dia) + "\n");
+                    debug("Mes: " + to_string(dados_mqtt.mes) + "\n");
+                    debug("Ano: " + to_string(dados_mqtt.ano) + "\n");
+                    debug("Latitude: " + to_string(dados_mqtt.f_latitude) + "\n");
+                    debug("Longitude: " + to_string(dados_mqtt.f_longitude) + "\n");
+                    debug("Temperatura: " + to_string(dados_mqtt.temperatura) + "\n");
+                    debug("Umidade: " + to_string(dados_mqtt.umidade) + "\n");
+                    debug("Tamanho: " + to_string(sizeof(dados_mqtt)) + "\n");
+                    debug("RSSI " + to_string(rssi) + "\n\n");
+                }
             }
             else {
                 debug("Erro ao receber mensagem :(\n");
