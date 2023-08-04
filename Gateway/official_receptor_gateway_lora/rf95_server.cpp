@@ -96,7 +96,7 @@ typedef struct
 #define BUF_END 5
 
 /***********************************************/
-#define MESSAGE_LENGTH 6    // 6 Bytes used in the message ((0)$ (1)sensorA (2)sensorB (3)sensorC (4)sensorD (5)\n)
+#define MESSAGE_LENGTH 44    // 6 Bytes used in the message ((0)$ (1)sensorA (2)sensorB (3)sensorC (4)sensorD (5)\n)
 #define TIME_TO_UPDATE 1000 // Time before entering to update mode.
 /***********************************************/
 /*! Habilita (1) ou desabilita (2) o debug. Pode ser ativado por linha de comando com

@@ -28,16 +28,29 @@ def subscribe(client: mqtt_client, conn, cur):
     def on_message(client, userdata, message):
         payload = message.payload
         dados = struct.unpack('iiiiiiiffffii', payload)
-        print(f"Contador: {dados[0]}")
-        print(f"Hora: {dados[1]}, Minuto: {dados[2]}, Segundo: {dados[3]}")
-        print(f"Dia: {dados[4]}, Mês: {dados[5]}, Ano: {dados[6]}")
-        print(f"Latitude: {round(dados[7], 6)}, Longitude: {round(dados[8], 6)}")
-        print(f"Temperatura: {round(dados[9], 1)}, Umidade: {round(dados[10], 1)}")
-        print(f"Tamanho: {dados[11]}, RSSI: {dados[12]}")
+        d_0 = dados[0]
+        d_1 = dados[1]
+        d_2 = dados[2]
+        d_3 = dados[3]
+        d_4 = dados[4]
+        d_5 = dados[5]
+        d_6 = dados[6]
+        d_7 = round(dados[7], 6)
+        d_8 = round(dados[8], 6)
+        d_9 = round(dados[9], 1)
+        d_10 = round(dados[10], 1)
+        d_11 = dados[11]
+        d_12 = dados[12]
+        print(f"Contador: {d_0}")
+        print(f"Hora: {d_1}, Minuto: {d_2}, Segundo: {d_3}")
+        print(f"Dia: {d_4}, Mês: {d_5}, Ano: {d_6}")
+        print(f"Latitude: {d_7}, Longitude: {d_8}")
+        print(f"Temperatura: {d_9}, Umidade: {d_10}")
+        print(f"Tamanho: {d_11}, RSSI: {d_12}")
         
         try:
             cur.execute(f"""insert into mensagem (valores) values 
-            ('{dados[0]};{dados[1]};{dados[2]};{dados[3]};{dados[4]};{dados[5]};{dados[6]};{dados[7]};{dados[8]};{dados[9]};{dados[10]};{dados[11]};{dados[12]}');
+            ('{d_0};{d_1};{d_2};{d_3};{d_4};{d_5};{d_6};{d_7};{d_8};{d_9};{d_10};{d_11};{d_12}');
             """)
             conn.commit()
             print("Registro inserido\n")

@@ -4,9 +4,29 @@ CREATE TABLE mensagem (
  data_hora_criacao TIMESTAMP DEFAULT NOW()
 );
 
-insert into mensagem (valores) values ('alan;1we:123');
+--delete from mensagem ;
+--drop table mensagem;
+
+--insert into mensagem (valores) values ('alan;1we:123');
 select count(*) from mensagem m ;
 select * from mensagem m order by m.id desc;
 
---delete from mensagem ;
---drop table mensagem;
+--31/07/2023
+select count(*) 
+from mensagem m 
+where DATE(m.data_hora_criacao) = '2023-07-31';
+-----
+select * 
+from mensagem m 
+where DATE(m.data_hora_criacao) = '2023-07-31' 
+order by m.id asc;
+
+--04/08/2023
+select count(*) 
+from mensagem m 
+where DATE(m.data_hora_criacao) = '2023-08-04';
+-----
+select * 
+from mensagem m 
+where DATE(m.data_hora_criacao) = '2023-08-04' 
+order by m.id desc;
